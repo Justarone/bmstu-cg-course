@@ -11,6 +11,7 @@ mod primitives {
         }
     }
 
+    #[derive(Clone)]
     pub struct Point3d { 
         pub x: f64,
         pub y: f64,
@@ -37,7 +38,7 @@ mod primitives {
 
 use primitives::*;
 
-struct Muscle {
+pub struct Muscle {
     radiuses: Vec<f64>,
     grow_mults: Vec<f64>,
     dx: f64,
@@ -100,9 +101,9 @@ impl Muscle {
     fn find_volume(&self) -> f64 {
         let mut res = 0_f64;
 
-        for i in 0..(self.radiuses.len() - 1) {
-            let dy = self.radiuses[i + 1] - self.radiuses[i];
-            res += dy * dy / 3_f64 + dy * self.radiuses[i] + self.radiuses[i] * self.radiuses[i];
+        for rads in self.radiuses.windows(2) {
+            let dy = rads[1] - rads[0];
+            res += dy * dy / 3_f64 + dy * rads[0] + rads[0] * rads[0];
         }
 
         res
@@ -111,9 +112,9 @@ impl Muscle {
     fn find_a(&self) -> f64 {
         let mut res = 0_f64;
 
-        for i in 0..(self.grow_mults.len() - 1) {
-            let diff = self.grow_mults[i + 1] - self.grow_mults[i];
-            res += self.grow_mults[i] * (self.grow_mults[i] + 2_f64 * diff) + 4_f64 / 3_f64 * diff * diff;
+        for mults in self.grow_mults.windows(2) {
+            let diff = mults[1] - mults[0];
+            res += mults[0] * (mults[0] + 2_f64 * diff) + 4_f64 / 3_f64 * diff * diff;
         }
 
         res
@@ -122,9 +123,8 @@ impl Muscle {
     fn find_b(&self) -> f64 {
         let mut res = 0_f64;
 
-        for i in 0..(self.radiuses.len() - 1) {
-            res += (self.radiuses[i + 1] - 0.25_f64 * self.radiuses[i]) * (self.grow_mults[i + 1] -
-                self.grow_mults[i]) * 8_f64 / 3_f64 + 2_f64 * self.grow_mults[i] * self.radiuses[i + 1];
+        for (rads, mults) in self.radiuses.windows(2).zip(self.grow_mults.windows(2)) {
+            res += (rads[1] - 0.25_f64 * rads[0]) * (mults[1] - mults[0]) * 8_f64 / 3_f64 + 2_f64 * mults[0] * rads[1];
         }
 
         res
@@ -133,17 +133,16 @@ impl Muscle {
     fn find_c(&self, g: f64) -> f64 {
         let mut res = 0_f64;
 
-        for i in 0..(self.radiuses.len() - 1) {
-            res += (self.radiuses[i + 1] - self.radiuses[i]) * (self.radiuses[i + 1] + 0.5 * self.radiuses[i]) *
-                4_f64 / 3_f64 + self.radiuses[i] * self.radiuses[i];
+        for rads in self.radiuses.windows(2) {
+            res += (rads[1] - rads[0]) * (rads[1] + 0.5 * rads[0]) * 4_f64 / 3_f64 + rads[0] * rads[0];
         }
 
         res - g
     }
     
     fn update_radiuses(&mut self, dy: f64) {
-        for (&mut rad, mult) in self.radiuses.iter_mut().zip(self.grow_mults.iter()) {
-            rad += mult * dy;
+        for (rad, mult) in self.radiuses.iter_mut().zip(self.grow_mults.iter()) {
+            *rad += mult * dy;
         }
     }
 
@@ -164,14 +163,14 @@ impl Muscle {
     }
 
     fn rotate_intersections(&self, p1: Point3d, p2: Point3d) -> Vec<Point3d> {
-        let mut res = vec![Point3d::new(0_f64, 0_f64, 0_f64); constants::DEGREES / constants::STEP * 2];
-        res[0] = p1;
-        res[1] = p2;
+        let mut res = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
+        res.push(p1.clone());
+        res.push(p2.clone());
 
-        for (i, angle) in (2..).step_by(2).zip((constants::STEP..constants::DEGREES).step_by(constants::STEP)) {
+        for (i, _) in (2..).step_by(2).zip((constants::STEP..constants::DEGREES).step_by(constants::STEP)) {
             let radAngle = i as f64 * std::f64::consts::PI / 180_f64;
-            res[i] = Point3d::new(p1.x, p1.y * f64::cos(radAngle), p1.y * f64::sin(radAngle));
-            res[i + 1] = Point3d::new(p2.x, p2.y * f64::cos(radAngle), p2.y * f64::sin(radAngle));
+            res.push(Point3d::new(p1.x, p1.y * f64::cos(radAngle), p1.y * f64::sin(radAngle)));
+            res.push(Point3d::new(p2.x, p2.y * f64::cos(radAngle), p2.y * f64::sin(radAngle)));
         }
 
         res

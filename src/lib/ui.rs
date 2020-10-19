@@ -1,5 +1,4 @@
 use gtk::prelude::*;
-use gio::prelude::*;
 use gdk::prelude::*;
 use gdk_pixbuf::{ Colorspace, Pixbuf };
 
