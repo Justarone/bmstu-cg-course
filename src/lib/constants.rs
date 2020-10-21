@@ -8,3 +8,4 @@ pub const MAX_PART: f64 = 2.5;
 
 pub const DEGREES: usize = 360;
 pub const STEP: usize = 2;
+pub const SPHERE_PARTS: usize = 10;

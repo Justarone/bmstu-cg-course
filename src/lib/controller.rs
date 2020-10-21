@@ -1,8 +1,7 @@
 use gdk_pixbuf::Pixbuf;
 use super::constants;
 
-mod muscle;
-use muscle::Muscle;
+use super::prelude::*;
 
 #[derive(Clone)]
 pub struct Controller {
