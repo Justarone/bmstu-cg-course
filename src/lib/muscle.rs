@@ -96,7 +96,7 @@ impl Muscle {
         }
     }
 
-    fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
+    pub fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
         let mut points =  Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
         let mut normal2points = Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
         self.fill_pn_connectors(&mut points, &mut normal2points);

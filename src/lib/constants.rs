@@ -10,6 +10,12 @@ pub const DEGREES: usize = 360;
 pub const STEP: usize = 2;
 pub const SPHERE_PARTS: usize = 10;
 
+pub const ROTATE_VAL: f64 = 0.5;
+pub const MOVE_VAL: f64 = 5.0;
+pub const SCALE_VAL: f64 = 0.8;
+
+pub const ATOM_DIFF: f64 = 1.0;
+
 pub mod keys {
     // ROTATIONS
     pub const H: u16 = 43; // rotate Y (left)
