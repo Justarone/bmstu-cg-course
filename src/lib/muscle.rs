@@ -9,10 +9,11 @@ pub struct Muscle {
     min_dx: f64,
     max_dx: f64,
     volume: f64,
+    color: (u8, u8, u8),
 }
 
 impl Muscle {
-    pub fn new(radiuses: Vec<f64>, grow_mults: Vec<f64>, len: f64) -> Self {
+    pub fn new(radiuses: Vec<f64>, grow_mults: Vec<f64>, len: f64, color: (u8, u8, u8)) -> Self {
         let dx = len / (radiuses.len() - 1) as f64;
         let mut muscle = Self {
             radiuses,
@@ -21,9 +22,14 @@ impl Muscle {
             min_dx: dx * constants::MIN_PART,
             max_dx: dx * constants::MAX_PART,
             volume: 0_f64,
+            color,
         };
         muscle.volume = muscle.find_volume();
         muscle
+    }
+
+    pub fn color(&self) -> (u8, u8, u8) {
+        self.color
     }
 
     pub fn deform(&mut self, diff: f64) {
@@ -45,25 +51,27 @@ impl Muscle {
         }
     }
 
-    fn fill_pn_connectors(&self, points: &mut Vec<Vec<Point3d>>, normals: &mut Vec<Vec<Vec3d>>) {
+    fn fill_pn_connectors(&self, points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>) {
         for i in 0..(self.radiuses.len() - 1) {
             let (p1, p2) = self.find_intersections(i, i + 1);
 
-            let (mut new_points, mut new_normals) = self.rotate_intersections(p1, p2,
+            let (mut new_points, mut new_norm2points) = self.rotate_intersections(p1, p2,
                 Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
                 Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)); // center of (i + 1)-th sphere
 
-            for j in 0..2 {
-                new_points.push(new_points[j].clone());
-                new_normals.push(new_normals[j].clone());
+            unsafe {
+                for j in 0..2 {
+                    new_points.push(new_points.get_unchecked(j).clone());
+                    new_norm2points.push(new_norm2points.get_unchecked(j).clone());
+                }
             }
 
             points.push(new_points);
-            normals.push(new_normals);
+            normal2points.push(new_norm2points);
         }
     }
 
-    fn fill_pn_spheres(&self, points: &mut Vec<Vec<Point3d>>, normals: &mut Vec<Vec<Vec3d>>) {
+    fn fill_pn_spheres(&self, points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>) {
         for (center, rad) in (0..self.radiuses.len()).map(|val| self.dx * val as f64).zip(self.radiuses.iter()) {
             let (from, step) = (center - rad, 2_f64 * rad / (constants::SPHERE_PARTS - 1) as f64);
             let mut solutions = Vec::with_capacity(constants::SPHERE_PARTS);
@@ -73,28 +81,28 @@ impl Muscle {
             }
 
             for (i, pts) in solutions.windows(2).enumerate() {
-                let (mut new_points, mut new_normals) = self.rotate_intersections(pts[0].clone(), pts[1].clone(),
+                let (mut new_points, mut new_norm2points) = self.rotate_intersections(pts[0].clone(), pts[1].clone(),
                     Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
                     Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)); // center of (i + 1)-th sphere
 
                 for j in 0..2 {
                     new_points.push(new_points[j].clone());
-                    new_normals.push(new_normals[j].clone());
+                    new_norm2points.push(new_norm2points[j].clone());
                 }
 
                 points.push(new_points);
-                normals.push(new_normals);
+                normal2points.push(new_norm2points);
             }
         }
     }
 
-    fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Vec3d>>) {
+    fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
         let mut points =  Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
-        let mut normals = Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
-        self.fill_pn_connectors(&mut points, &mut normals);
-        self.fill_pn_spheres(&mut points, &mut normals);
+        let mut normal2points = Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
+        self.fill_pn_connectors(&mut points, &mut normal2points);
+        self.fill_pn_spheres(&mut points, &mut normal2points);
 
-        (points, normals)
+        (points, normal2points)
     }
 
     fn find_volume(&self) -> f64 {
@@ -163,26 +171,26 @@ impl Muscle {
     }
 
     fn rotate_intersections(&self, p1: Point3d, p2: Point3d, c1: Point3d,
-        c2: Point3d) -> (Vec<Point3d>, Vec<Vec3d>) {
+        c2: Point3d) -> (Vec<Point3d>, Vec<Point3d>) {
         let mut points = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
-        let mut normals = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
+        let mut normal2points = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
 
         points.push(p1.clone());
         points.push(p2.clone());
-        normals.push(Vec3d::from_pts(&c1, &p1));
-        normals.push(Vec3d::from_pts(&c2, &p2));
+        normal2points.push(Point3d::new(2.0 * p1.x - c1.x, 2.0 * p1.y - c1.y, 2.0 * p1.z - c1.z));
+        normal2points.push(Point3d::new(2.0 * p2.x - c2.x, 2.0 * p2.y - c2.y, 2.0 * p2.z - c2.z));
 
-        for angle in (constants::STEP..constants::DEGREES).step_by(constants::STEP) {
-            let angle = angle as f64 * std::f64::consts::PI / 180_f64; // convert to radians
+        for angle in (constants::STEP..constants::DEGREES).step_by(constants::STEP)
+            .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64) {
             let t1 = Point3d::new(p1.x, p1.y * f64::cos(angle), p1.y * f64::sin(angle));
             let t2 = Point3d::new(p2.x, p2.y * f64::cos(angle), p2.y * f64::sin(angle));
 
-            normals.push(Vec3d::from_pts(&c1, &t1));
-            normals.push(Vec3d::from_pts(&c2, &t2));
+            normal2points.push(Point3d::new(2.0 * t1.x - c1.x, 2.0 * t1.y - c1.y, 2.0 * t1.z - c1.z));
+            normal2points.push(Point3d::new(2.0 * t2.x - c2.x, 2.0 * t2.y - c2.y, 2.0 * t2.z - c2.z));
             points.push(t1);
             points.push(t2);
         }
 
-        (points, normals)
+        (points, normal2points)
     }
 }
