@@ -42,9 +42,9 @@ pub fn build_ui(app: &gtk::Application) {
     window.add(&fixed);
     drawing_area.set_size_request(constants::WIDTH as i32, constants::HEIGHT as i32);
 
-    let rads = vec![10_f64, 10_f64, 10_f64, 10_f64, 10_f64, 10_f64, 10_f64, 10_f64];
+    let rads = vec![50_f64, 50_f64, 50_f64, 50_f64, 50_f64, 50_f64, 50_f64, 50_f64];
     let gm = vec![0_f64, 1_f64, 1_f64, 2_f64, 2_f64, 2_f64, 2_f64, 1_f64, 1_f64, 0_f64];
-    let len = 9_f64;
+    let len = 500_f64;
     let muscle = Arc::new(Mutex::new(Muscle::new(rads, gm, len)));
     let pixbuf = Pixbuf::new(Colorspace::Rgb, constants::HAS_ALPHA, constants::BITS_PER_COLOR,
         constants::WIDTH as i32, constants::HEIGHT as i32).unwrap();

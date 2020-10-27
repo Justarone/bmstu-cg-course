@@ -233,28 +233,16 @@ pub struct Section {
 
 impl Section {
     pub fn new(from: &IntYPoint3d, to: &IntYPoint3d, from_br: f64, to_br: f64) -> Self {
-        let x_step;
-        let z_step;
-        let br_step;
         let diff_y = to.y - from.y;
-        if diff_y == 0 {
-            x_step = 0_f64;
-            z_step = 0_f64;
-            br_step = 0_f64;
-        } else {
-            x_step = (to.x - from.x) / diff_y as f64;
-            z_step = (to.z - from.z) / diff_y as f64;
-            br_step = (to_br - from_br) / diff_y as f64;
-        }
         Self {
             y_start: from.y,
             y_end: to.y,
             x_start: from.x,
             z_start: from.z,
-            x_step,
-            z_step,
+            x_step: (to.x - from.x) / diff_y as f64,
+            z_step: (to.z - from.z) / diff_y as f64,
             br_start: from_br,
-            br_step,
+            br_step: (to_br - from_br) / diff_y as f64,
         }
     }
 }

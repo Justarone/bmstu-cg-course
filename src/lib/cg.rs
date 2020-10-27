@@ -1,13 +1,15 @@
 use super::prelude::*;
+use log::{ trace, debug };
+use termion::{ color, style };
+use itertools::Itertools;
 
 static mut z_buffer: [[f64; constants::WIDTH]; constants::HEIGHT] =
-    [[0.0; constants::WIDTH]; constants::HEIGHT];
+    [[f64::MIN; constants::WIDTH]; constants::HEIGHT];
 static mut color_buffer: [[u32; constants::WIDTH]; constants::HEIGHT] =
     [[constants::DEFAULT_COLOR; constants::WIDTH]; constants::HEIGHT];
 
 
 pub unsafe fn clear_buffers() {
-    println!("strat");
     for line in z_buffer.iter_mut() {
         for pixel in line.iter_mut() {
             *pixel = constants::MIN_Z;
@@ -19,7 +21,6 @@ pub unsafe fn clear_buffers() {
             *color = constants::DEFAULT_COLOR;
         }
     }
-    println!("end");
 }
 
 
@@ -60,21 +61,67 @@ unsafe fn flush(pb: Pixbuf) {
 }
 
 unsafe fn add_polygon(points: [Point3d; 3], mut normals: [Vec3d; 3], light_source: &Vec3d, color: u32) {
-    println!("Debug: {:?}", points);
+    //trace!("Trace ((float y) points before sorting): {:?}", points);
     let mut int_points = [IntYPoint3d::from(points[0]), IntYPoint3d::from(points[1]), IntYPoint3d::from(points[2])];
     sort_by_y(&mut int_points, &mut normals);
+    //trace!("Trace ((int y) points after sorting): {:?}", int_points);
     let brightnesses = find_brightnesses(normals, light_source);
     let sections = divide_on_sections(int_points, brightnesses);
     process_sections(sections, color);
+    //debug!("COLOR_BUFFER:\n{}", color_buffer[5][0]);
 }
 
-unsafe fn process_sections(sections: [Section; 4], color: u32) {
-    
+unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
+    for pair in sections.chunks_mut(2) {
+        if pair[0].x_start > pair[1].x_start {
+            continue;
+        }
+        for y in (pair[0].y_start as usize)..=(pair[0].y_end as usize) {
+            //debug!("{}Inside outer loop{}", color::Fg(color::Yellow), style::Reset);
+            let x_from = f64::round(pair[0].x_start) as usize;
+            let x_to = f64::round(pair[1].x_start) as usize;
+            let diff_x = (x_to - x_from) as f64;
+
+            let mut br = pair[0].br_start;
+            let br_diff = (pair[1].br_start - br) / diff_x;
+            let mut z = pair[0].z_start;
+            let z_diff = (pair[1].z_start - z) / diff_x;
+
+            for x in x_from..=x_to {
+                //debug!("{}Inside inner loop{}", color::Fg(color::Green), style::Reset);
+                if z > z_buffer[x][y] {
+                    z_buffer[x][y] = z;
+                    put_color(x, y, color, br);
+                }
+
+                br += br_diff;
+                z += z_diff;
+            }
+
+            for sec in pair.iter_mut() {
+                sec.x_start += sec.x_step;
+                sec.br_start += sec.br_step;
+                sec.z_start += sec.z_step;
+            }
+        }
+    }
+}
+
+unsafe fn put_color(x: usize, y: usize, color: u32, br: f64) {
+    //debug!("br = {}", br);
+    let (r, g, b, a) = ((color >> 24) as f64 * br, (color >> 16 & 0xFF) as f64 * br, 
+        (color >> 8 & 0xFF) as f64 * br, (color & 0xFF) as u32);
+    let color = /*(f64::round(r) as u32) << 24 + (f64::round(g) as u32) << 16 + (f64::round(b) as u32) << 8 + */a;
+    *color_buffer.get_unchecked_mut(y).get_unchecked_mut(x) = color;
 }
 
 unsafe fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3]) {
     for (&i, &j) in [0, 0, 1].iter().zip([2, 1, 2].iter()) {
-        if int_points.get_unchecked(i).y > int_points.get_unchecked(j).y {
+        let condition = {
+            let (a, b) = (int_points.get_unchecked(i), int_points.get_unchecked(j));
+            a.y > b.y || a.y == b.y && a.x > b.x
+        };
+        if condition {
             int_points.swap(i, j);
             normals.swap(i, j);
         }
@@ -82,13 +129,25 @@ unsafe fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3])
 }
 
 unsafe fn find_brightnesses(normals: [Vec3d; 3], light_source: &Vec3d) -> [f64; 3] {
-    [normals.get_unchecked(0).scalar_mul(light_source), normals.get_unchecked(1).scalar_mul(light_source),
-        normals.get_unchecked(2).scalar_mul(light_source)]
+    [0.8 + 0.5 * (normals.get_unchecked(0).scalar_mul(light_source)), 0.8 + 0.5 * (normals.get_unchecked(1).scalar_mul(light_source)),
+        0.8 + 0.5 * (normals.get_unchecked(2).scalar_mul(light_source))]
 }
 
 unsafe fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3]) -> [Section; 4] {
+    //trace!("Trace (points to make sections): {:?}", int_points);
+    // one line: that's not a general case, so we need to iterate from min.x to max.x (FIXME: now
+    // it's terrible, because I need only one outer iteration over one line, and in this case I
+    // have to have 2)
+    if int_points.get_unchecked(0).y == int_points.get_unchecked(2).y {
+        //trace!("{}Trace: One line case! Higher you may see coordinates...{}",
+            //color::Fg(color::Red), style::Reset);
+        return [Section::new(int_points.get_unchecked(0), int_points.get_unchecked(2), *brightnesses.get_unchecked(0), *brightnesses.get_unchecked(2)),
+                Section::new(int_points.get_unchecked(2), int_points.get_unchecked(0), *brightnesses.get_unchecked(2), *brightnesses.get_unchecked(0)),
+                Section::new(int_points.get_unchecked(2), int_points.get_unchecked(0), *brightnesses.get_unchecked(2), *brightnesses.get_unchecked(0)),
+                Section::new(int_points.get_unchecked(0), int_points.get_unchecked(2), *brightnesses.get_unchecked(0), *brightnesses.get_unchecked(2))]
+    };
+
     let midpoint2 = find_midpoint2(&int_points.get_unchecked(0), &int_points.get_unchecked(2), int_points.get_unchecked(1).y);
-    println!("Debug: {:?}", int_points);
     let midbrightness = brightnesses.get_unchecked(0) + (brightnesses.get_unchecked(2) - brightnesses.get_unchecked(0)) *
         ((int_points.get_unchecked(1).y - int_points.get_unchecked(0).y) as f64 /
          (int_points.get_unchecked(2).y - int_points.get_unchecked(0).y) as f64);
@@ -107,7 +166,7 @@ unsafe fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3
 }
 
 fn find_midpoint2(min: &IntYPoint3d, max: &IntYPoint3d, mid_y: u16) -> IntYPoint3d {
-    let mult = (max.y - mid_y) as f64 / (max.y - min.y) as f64;
+    let mult = if max.y == min.y { 1.0 } else { (mid_y - min.y) as f64 / (max.y - min.y) as f64 };
     IntYPoint3d {
         x: min.x + (max.x - min.x) * mult,
         y: mid_y,

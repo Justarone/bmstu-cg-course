@@ -13,6 +13,10 @@ gdk-pixbuf = "^0"
 lazy_static = "^0"
 cairo = "^0"
 approx = "^0"
+log = "^0"
+env_logger = "^0"
+termion = "^1"
+itertools = "^0"
 
 [dependencies.gtk]
 version = "0.9.0"
