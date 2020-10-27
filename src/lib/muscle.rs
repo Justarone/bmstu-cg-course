@@ -9,11 +9,10 @@ pub struct Muscle {
     min_dx: f64,
     max_dx: f64,
     volume: f64,
-    color: (u8, u8, u8),
 }
 
 impl Muscle {
-    pub fn new(radiuses: Vec<f64>, grow_mults: Vec<f64>, len: f64, color: (u8, u8, u8)) -> Self {
+    pub fn new(radiuses: Vec<f64>, grow_mults: Vec<f64>, len: f64) -> Self {
         let dx = len / (radiuses.len() - 1) as f64;
         let mut muscle = Self {
             radiuses,
@@ -22,14 +21,9 @@ impl Muscle {
             min_dx: dx * constants::MIN_PART,
             max_dx: dx * constants::MAX_PART,
             volume: 0_f64,
-            color,
         };
         muscle.volume = muscle.find_volume();
         muscle
-    }
-
-    pub fn color(&self) -> (u8, u8, u8) {
-        self.color
     }
 
     pub fn deform(&mut self, diff: f64) {

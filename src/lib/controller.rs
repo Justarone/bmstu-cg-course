@@ -44,7 +44,12 @@ impl Controller {
             self.cached_muscle = Some(muscle.get_points_and_normals());
         }
 
-        transform_and_flush(self.cached_muscle.as_ref().unwrap(), &self.matrix, self.pb.clone());
+        unsafe {
+            clear_buffers();
+            transform_and_flush(self.cached_muscle.as_ref().unwrap(),
+            &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION, 
+            constants::MUSCLE_COLOR); 
+        } 
     }
 
     fn update_matrix(&mut self, operation: Operation, val: f64) {
