@@ -89,8 +89,8 @@ unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
 
             for x in x_from..=x_to {
                 //debug!("{}Inside inner loop{}", color::Fg(color::Green), style::Reset);
-                if z > z_buffer[x][y] {
-                    z_buffer[x][y] = z;
+                if z > z_buffer[y][x] {
+                    z_buffer[y][x] = z;
                     put_color(x, y, color, br);
                 }
 
@@ -111,7 +111,8 @@ unsafe fn put_color(x: usize, y: usize, color: u32, br: f64) {
     //debug!("br = {}", br);
     let (r, g, b, a) = ((color >> 24) as f64 * br, (color >> 16 & 0xFF) as f64 * br, 
         (color >> 8 & 0xFF) as f64 * br, (color & 0xFF) as u32);
-    let color = /*(f64::round(r) as u32) << 24 + (f64::round(g) as u32) << 16 + (f64::round(b) as u32) << 8 + */a;
+    let (r, g, b, a) = ((f64::round(r) as u32) << 24, (f64::round(g) as u32) << 16, (f64::round(b) as u32) << 8, a);
+    let color = r + g + b + a;
     *color_buffer.get_unchecked_mut(y).get_unchecked_mut(x) = color;
 }
 

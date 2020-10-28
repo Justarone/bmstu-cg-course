@@ -188,6 +188,10 @@ impl Transformator for Matrix4 {
     }
 
     fn rotate(&mut self, angle: f64, axis: Axis) {
+        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
+        for elem in self.data[3][0..2].iter_mut() {
+            *elem = 0_f64;
+        }
         let rhs = match axis {
             Axis::Y => Matrix4::from([
                 [f64::cos(angle), 0_f64, f64::sin(angle), 0_f64],
@@ -210,10 +214,13 @@ impl Transformator for Matrix4 {
         };
 
         *self *= rhs;
+
+        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.into_iter()) {
+            *elem = *copy;
+        }
     }
 
     fn scale(&mut self, val: f64) {
-        assert_eq!(val, 0_f64);
         for i in 0..3 {
             unsafe { *self.data.get_unchecked_mut(i).get_unchecked_mut(i) *= val; }
         }

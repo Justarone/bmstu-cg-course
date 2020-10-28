@@ -38,7 +38,11 @@ impl Muscle {
         let b = self.find_b();
         let c = self.find_c(g2);
 
-        let dy = solve_quad_eq(a, b, c);
+        let dy = if self.dx > new_dx { //solve_quad_eq(a, b, c);
+            (Some(0.1), Some(0.1)) 
+        } else {
+            (Some(-0.1), Some(-0.1)) 
+        }; 
         if let Some(dy) = dy.1 {
             self.update_radiuses(dy);
             self.dx = new_dx;
@@ -49,7 +53,7 @@ impl Muscle {
         for i in 0..(self.radiuses.len() - 1) {
             let (p1, p2) = self.find_intersections(i, i + 1);
 
-            let (mut new_points, mut new_norm2points) = self.rotate_intersections(p1, p2,
+            let (mut new_points, mut new_norm2points) = Self::rotate_intersections(p1, p2,
                 Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
                 Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)); // center of (i + 1)-th sphere
 
@@ -66,27 +70,32 @@ impl Muscle {
     }
 
     fn fill_pn_spheres(&self, points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>) {
-        for (center, rad) in (0..self.radiuses.len()).map(|val| self.dx * val as f64).zip(self.radiuses.iter()) {
-            let (from, step) = (center - rad, 2_f64 * rad / (constants::SPHERE_PARTS - 1) as f64);
-            let mut solutions = Vec::with_capacity(constants::SPHERE_PARTS);
+        let index_arr = [0, self.radiuses.len() - 1];
+        for (center, rad) in index_arr.iter().map(|&index| (self.dx * index as f64, self.radiuses[index])) {
+            Self::add_uv_sphere(points, normal2points, center, rad);
+        }
+    }
 
-            for x in (0..constants::SPHERE_PARTS).map(|i| from + step * i as f64) {
-                solutions.push(Point3d::new(x, f64::sqrt(rad - f64::powi(x - center, 2)), 0_f64));
+    fn add_uv_sphere(points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>, center: f64, rad: f64) {
+        let (from, step) = (center - rad, 2_f64 * rad / (constants::SPHERE_PARTS - 1) as f64);
+        let mut solutions = Vec::with_capacity(constants::SPHERE_PARTS);
+
+        for x in (0..constants::SPHERE_PARTS).map(|i| from + step * i as f64) {
+            solutions.push(Point3d::new(x, f64::sqrt(rad * rad - f64::powi(x - center, 2)), 0_f64));
+        }
+
+        for pts in solutions.windows(2) {
+            let (mut new_points, mut new_norm2points) = Self::rotate_intersections(pts[0].clone(), pts[1].clone(),
+                Point3d::new(center, 0_f64, 0_f64),
+                Point3d::new(center, 0_f64, 0_f64));
+
+            for j in 0..2 {
+                new_points.push(new_points[j].clone());
+                new_norm2points.push(new_norm2points[j].clone());
             }
 
-            for (i, pts) in solutions.windows(2).enumerate() {
-                let (mut new_points, mut new_norm2points) = self.rotate_intersections(pts[0].clone(), pts[1].clone(),
-                    Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
-                    Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)); // center of (i + 1)-th sphere
-
-                for j in 0..2 {
-                    new_points.push(new_points[j].clone());
-                    new_norm2points.push(new_norm2points[j].clone());
-                }
-
-                points.push(new_points);
-                normal2points.push(new_norm2points);
-            }
+            points.push(new_points);
+            normal2points.push(new_norm2points);
         }
     }
 
@@ -148,7 +157,8 @@ impl Muscle {
         }
     }
 
-    fn find_intersections(&self, mut i1: usize, mut i2: usize) -> (Point3d, Point3d) {
+    #[allow(dead_code)]
+    fn find_rad_intersections(&self, mut i1: usize, mut i2: usize) -> (Point3d, Point3d) {
         if i1 > i2 {
             std::mem::swap(&mut i1, &mut i2);
         }
@@ -164,17 +174,26 @@ impl Muscle {
             Point3d::new( c2x + d.x * self.radiuses[i2], d.y * self.radiuses[i2], 0_f64))
     }
 
-    fn rotate_intersections(&self, p1: Point3d, p2: Point3d, c1: Point3d,
+    fn find_intersections(&self, mut i1: usize, mut i2: usize) -> (Point3d, Point3d) {
+        if i1 > i2 {
+            std::mem::swap(&mut i1, &mut i2);
+        }
+
+        (Point3d::new(self.dx * i1 as f64, self.radiuses[i1], 0_f64),
+            Point3d::new(self.dx * i2 as f64, self.radiuses[i2], 0_f64))
+    }
+
+    fn rotate_intersections(p1: Point3d, p2: Point3d, c1: Point3d,
         c2: Point3d) -> (Vec<Point3d>, Vec<Point3d>) {
         let mut points = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
         let mut normal2points = Vec::with_capacity(constants::DEGREES / constants::STEP * 2);
 
-        points.push(p1.clone());
-        points.push(p2.clone());
-        normal2points.push(Point3d::new(2.0 * p1.x - c1.x, 2.0 * p1.y - c1.y, 2.0 * p1.z - c1.z));
-        normal2points.push(Point3d::new(2.0 * p2.x - c2.x, 2.0 * p2.y - c2.y, 2.0 * p2.z - c2.z));
+        //points.push(p1.clone());
+        //points.push(p2.clone());
+        //normal2points.push(Point3d::new(2.0 * p1.x - c1.x, 2.0 * p1.y - c1.y, 2.0 * p1.z - c1.z));
+        //normal2points.push(Point3d::new(2.0 * p2.x - c2.x, 2.0 * p2.y - c2.y, 2.0 * p2.z - c2.z));
 
-        for angle in (constants::STEP..constants::DEGREES).step_by(constants::STEP)
+        for angle in (0..constants::DEGREES).step_by(constants::STEP)
             .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64) {
             let t1 = Point3d::new(p1.x, p1.y * f64::cos(angle), p1.y * f64::sin(angle));
             let t2 = Point3d::new(p2.x, p2.y * f64::cos(angle), p2.y * f64::sin(angle));

@@ -97,10 +97,7 @@ impl Controller {
                     _ => unreachable!("No way"),
                 };
 
-                {
-                    let mut muscle = self.muscle.lock().unwrap();
-                    muscle.deform(diff);
-                }
+                self.deform_muscle(diff);
                 self.update_pixbuf();
             }
 

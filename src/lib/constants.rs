@@ -16,11 +16,13 @@ pub const ROTATE_VAL: f64 = 0.5;
 pub const MOVE_VAL: f64 = 5.0;
 pub const SCALE_VAL: f64 = 0.8;
 
-pub const ATOM_DIFF: f64 = 1.0;
+pub const ATOM_DIFF: f64 = 2.0;
 
 pub const MIN_Z: f64 = f64::MIN;
 pub const DEFAULT_COLOR: u32 = 0x1E1E1EFF;
 pub const MUSCLE_COLOR: u32 = 0x800000FF;
+
+pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "muscle.yaml"];
 
 // this light vector must be normalized and it must direct to light source
 pub const LIGHT_SOURCE_DIRECTION: Vec3d = Vec3d { 

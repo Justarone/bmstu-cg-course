@@ -1,4 +1,10 @@
+use std::io::BufReader;
+use std::fs::File;
+use std::env;
+use serde::{ Serialize, Deserialize };
 use std::f64;
+
+use super::prelude::*;
 
 pub fn solve_quad_eq(a: f64, b: f64, c: f64) -> (Option<f64>, Option<f64>) {
     if relative_eq!(a, 0_f64) {
@@ -18,6 +24,23 @@ pub fn solve_quad_eq(a: f64, b: f64, c: f64) -> (Option<f64>, Option<f64>) {
             (Some((-b - dsqrt) / 2_f64 / a), Some((-b + dsqrt) / 2_f64 / a))
         }
     }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Config {
+    pub radiuses: Vec<f64>,
+    pub grow_mults: Vec<f64>,
+    pub len: f64,
+}
+
+pub fn read_from_config() -> Config {
+    let mut config_path = env::current_dir().expect("Current directory");
+    for elem in constants::RELATIVE_CONF_PATH.iter() {
+        config_path.push(elem);
+    }
+    let reader = File::open(config_path.to_str().expect("File to string")).expect("Open config file");
+    let reader = BufReader::new(reader);
+    serde_yaml::from_reader(reader).expect("Data from config")
 }
 
 #[cfg(test)]
