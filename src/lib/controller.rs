@@ -21,12 +21,16 @@ pub struct Controller {
 
 impl Controller {
     pub fn new(pb: Pixbuf, muscle: Arc<Mutex<Muscle>>) -> Self {
+        let mut matrix = Matrix4::identity();
+        matrix.mov((constants::WIDTH / 2) as f64, Axis::X);
+        matrix.mov((constants::HEIGHT / 2) as f64, Axis::Y);
+
         Self {
             height: constants::HEIGHT,
             width: constants::WIDTH,
             pb,
             muscle,
-            matrix: Matrix4::identity(),
+            matrix,
             cached_muscle: None,
         }
     }

@@ -1,36 +1,10 @@
 use std::ops::MulAssign;
 
-pub struct Polygon;
-
-impl Polygon {
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 #[derive(Clone, Copy, Debug)]
 pub struct Point3d { 
     pub x: f64,
     pub y: f64,
     pub z: f64,
-}
-
-#[derive(Debug)]
-pub struct IntYPoint3d {
-    pub x: f64,
-    pub y: u16,
-    pub z: f64
-}
-
-impl From<Point3d> for IntYPoint3d {
-    fn from(point: Point3d) -> Self {
-        Self {
-            // maybe I shouldn't convert x to u16
-            x: point.x,
-            y: f64::round(point.y) as u16,
-            z: point.z,
-        }
-    }
 }
 
 impl Point3d {
@@ -45,7 +19,24 @@ impl Default for Point3d {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug)]
+pub struct IntYPoint3d {
+    pub x: f64,
+    pub y: u16,
+    pub z: f64
+}
+
+impl From<Point3d> for IntYPoint3d {
+    fn from(point: Point3d) -> Self {
+        Self {
+            x: point.x,
+            y: f64::round(point.y) as u16,
+            z: point.z,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Vec3d { 
     pub x: f64,
     pub y: f64,
@@ -76,12 +67,10 @@ impl Vec3d {
         f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
     }
 
-    pub fn add(&self, other: &Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-        }
+    pub fn add_assign(&mut self, other: &Self) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
     }
 
     pub fn scalar_mul(&self, other: &Self) -> f64 {
@@ -130,7 +119,6 @@ impl Matrix4 {
             data: [[0.0; 4]; 4],
         }
     }
-
 }
 
 impl From<[[f64; 4]; 4]> for Matrix4 {
@@ -148,7 +136,7 @@ impl MulAssign<Matrix4> for Matrix4 {
         for (i, row) in res.iter_mut().enumerate() {
             for (j, elem) in row.iter_mut().enumerate() {
                 for (k, lhs_k) in self.data[i].iter().enumerate() {
-                    *elem += lhs_k * unsafe { rhs.data.get_unchecked(k).get_unchecked(j) };
+                    *elem += lhs_k * rhs.data[k][j];
                 }
             }
         }
@@ -253,40 +241,3 @@ impl Section {
         }
     }
 }
-
-//pub struct Color {
-    //pub r: u8,
-    //pub g: u8,
-    //pub b: u8,
-    //pub a: u8,
-//}
-
-//impl Default for Color {
-    //fn default() -> Self {
-        //Self::new(0, 0, 0, 255)
-    //}
-//}
-
-//impl Color {
-    //pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
-        //Self {
-            //r, g, b, a,
-        //}
-    //}
-//}
-
-//impl Into<u32> for Color {
-    //fn into(self) -> u32 {
-        //(self.r as u32) << 24 + (self.g as u32) << 16 + (self.b as u32) << 8 + (self.a as u32)
-    //}
-//}
-
-//impl From<u32> for Color {
-    //fn from(arg: u32) -> Self {
-        //let r = (arg & 0xFF000000 >> 24) as u8;
-        //let g = (arg & 0x00FF0000 >> 16) as u8;
-        //let b = (arg & 0x0000FF00 >> 8) as u8;
-        //let a = (arg & 0x000000FF) as u8;
-        //Self { r, g, b, a }
-    //}
-//}

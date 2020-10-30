@@ -9,7 +9,7 @@ use lib::prelude::build_ui;
 fn main() {
     env_logger::init();
     let application = gtk::Application::new(None, Default::default())
-        .expect("failed to initialize GTK application");
+        .expect("Init GTK application");
     application.connect_activate(build_ui);
     application.run(&std::env::args().collect::<Vec<_>>());
 }

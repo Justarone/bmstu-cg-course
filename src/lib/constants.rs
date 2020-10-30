@@ -22,38 +22,36 @@ pub const MIN_Z: f64 = f64::MIN;
 pub const DEFAULT_COLOR: u32 = 0x1E1E1EFF;
 pub const MUSCLE_COLOR: u32 = 0x800000FF;
 
+pub const ZERO_BRIGHTNESS: f64 = 0.8;
+pub const BRIGHTNESS_RANGE: f64 = 0.5;
+
 pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "muscle.yaml"];
 
 // this light vector must be normalized and it must direct to light source
-pub const LIGHT_SOURCE_DIRECTION: Vec3d = Vec3d { 
+pub const LIGHT_SOURCE_DIRECTION: Vec3d = Vec3d {
     x: 0.57735,
     y: -0.57735,
     z: -0.57735,
 };
 
-
 pub mod keys {
-    // ROTATIONS
-    pub const H: u16 = 43; // rotate Y (left)
-    pub const L: u16 = 46; // (right)
-    pub const J: u16 = 44; // rotate X (down)
-    pub const K: u16 = 45; // (up)
-    pub const F: u16 = 41; // rotate Z (clockwise)
-    pub const T: u16 = 28; // (otherclock-wise)
+    pub const H: u16 = 43;
+    pub const L: u16 = 46;
+    pub const J: u16 = 44;
+    pub const K: u16 = 45;
+    pub const F: u16 = 41;
+    pub const T: u16 = 28;
 
-    // MOVEMENTS
-    pub const A: u16 = 38; // move (left)
-    pub const S: u16 = 39; // (down)
-    pub const D: u16 = 40; // (right)
-    pub const W: u16 = 25; // (up)
-    pub const Q: u16 = 24; // (top)
-    pub const E: u16 = 26; // (bottom)
+    pub const A: u16 = 38;
+    pub const S: u16 = 39;
+    pub const D: u16 = 40;
+    pub const W: u16 = 25;
+    pub const Q: u16 = 24;
+    pub const E: u16 = 26;
 
-    // SCALING
-    pub const P: u16 = 33; // scale (up)
-    pub const M: u16 = 58; // (down)
+    pub const P: u16 = 33;
+    pub const M: u16 = 58;
 
-    // DEFORMATIONS
-    pub const X: u16 = 53; // (shorten)
-    pub const V: u16 = 55; // (lengthen)
+    pub const X: u16 = 53;
+    pub const V: u16 = 55;
 }

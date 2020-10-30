@@ -26,6 +26,12 @@ pub fn solve_quad_eq(a: f64, b: f64, c: f64) -> (Option<f64>, Option<f64>) {
     }
 }
 
+pub fn cycle_extend<T: Clone>(arr: &mut Vec<T>, n: usize) {
+    for i in 0..n {
+        arr.push(arr[i].clone());
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub radiuses: Vec<f64>,
