@@ -42,8 +42,8 @@ impl Muscle {
         let b = self.find_b();
         let c = self.find_c(g2);
 
-        let dy = dy_stub(self.dx > new_dx); 
-        //let dy = solve_quad_eq(a, b, c);
+        //let dy = dy_stub(self.dx > new_dx); 
+        let dy = solve_quad_eq(a, b, c);
         if let Some(dy) = dy.1 {
             self.update_radiuses(dy);
             self.dx = new_dx;
@@ -109,26 +109,24 @@ impl Muscle {
             res += dy * dy / 3_f64 + dy * rads[0] + rads[0] * rads[0];
         }
 
-        res
+        res * self.dx
     }
 
     fn find_a(&self) -> f64 {
         let mut res = 0_f64;
 
         for mults in self.grow_mults.windows(2) {
-            let diff = mults[1] - mults[0];
-            res += mults[0] * (mults[0] + 2_f64 * diff) + 4_f64 / 3_f64 * diff * diff;
+            res += mults[1] * mults[1] - 5_f64 * mults[0] * mults[1] + 7_f64 * mults[0] * mults[0];
         }
 
-        res
+        res / 3_f64
     }
 
     fn find_b(&self) -> f64 {
         let mut res = 0_f64;
 
         for (rads, mults) in self.radiuses.windows(2).zip(self.grow_mults.windows(2)) {
-            res += (rads[1] - 0.25_f64 * rads[0]) * (mults[1] - mults[0]) * 8_f64 / 3_f64 +
-                2_f64 * mults[0] * rads[1];
+            res += mults[1] * rads[0] + mults[0] * rads[1];
         }
 
         res
@@ -138,7 +136,7 @@ impl Muscle {
         let mut res = 0_f64;
 
         for rads in self.radiuses.windows(2) {
-            res += (rads[1] - rads[0]) * (rads[1] + 0.5 * rads[0]) * 4_f64 / 3_f64 + rads[0] * rads[0];
+            res += 1_f64 / 3_f64 * f64::powi(rads[1] - rads[0], 2) + rads[0] * rads[1];
         }
 
         res - g
