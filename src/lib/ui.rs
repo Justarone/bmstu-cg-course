@@ -46,7 +46,10 @@ pub fn build_ui(app: &gtk::Application) {
     let muscle = Arc::new(Mutex::new(Muscle::new(rads, gm, len)));
     let pixbuf = Pixbuf::new(Colorspace::Rgb, constants::HAS_ALPHA, constants::BITS_PER_COLOR,
         constants::WIDTH as i32, constants::HEIGHT as i32).unwrap();
-    let controller = Arc::new(Mutex::new(Controller::new(pixbuf.clone(), muscle)));
+
+    let mut controller = Controller::new(pixbuf.clone(), muscle);
+    controller.update_pixbuf();
+    let controller = Arc::new(Mutex::new(controller));
 
 
     drawing_area.connect_draw(

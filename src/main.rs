@@ -7,7 +7,6 @@ mod lib;
 use lib::prelude::build_ui;
 
 fn main() {
-    env_logger::init();
     let application = gtk::Application::new(None, Default::default())
         .expect("Init GTK application");
     application.connect_activate(build_ui);

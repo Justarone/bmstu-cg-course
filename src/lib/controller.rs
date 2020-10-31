@@ -1,4 +1,5 @@
 use std::sync::{ Arc, Mutex };
+use termion::{ style, color };
 
 use super::prelude::*;
 use keys::*;
@@ -35,14 +36,13 @@ impl Controller {
         }
     }
 
-    #[allow(dead_code)]
     fn deform_muscle(&mut self, diff: f64) {
         let mut muscle = self.muscle.lock().unwrap();
         muscle.deform(diff);
         self.cached_muscle = Some(muscle.get_points_and_normals());
     }
 
-    fn update_pixbuf(&mut self) { 
+    pub fn update_pixbuf(&mut self) {
         if let None = self.cached_muscle {
             let muscle = self.muscle.lock().unwrap();
             self.cached_muscle = Some(muscle.get_points_and_normals());
@@ -72,8 +72,8 @@ impl Controller {
                 let (operation, val) = match key {
                     H => (Operation::Rotate(Axis::Y), constants::ROTATE_VAL),
                     L => (Operation::Rotate(Axis::Y), -constants::ROTATE_VAL),
-                    J => (Operation::Rotate(Axis::X), -constants::ROTATE_VAL),
-                    K => (Operation::Rotate(Axis::X), constants::ROTATE_VAL),
+                    J => (Operation::Rotate(Axis::X), constants::ROTATE_VAL),
+                    K => (Operation::Rotate(Axis::X), -constants::ROTATE_VAL),
                     F => (Operation::Rotate(Axis::Z), constants::ROTATE_VAL),
                     T => (Operation::Rotate(Axis::Z), -constants::ROTATE_VAL),
 
@@ -106,7 +106,7 @@ impl Controller {
             }
 
             // unknown keys
-            val => println!("Unknown command: {}", val),
+            val => println!("{}Unknown command: {}{}", color::Fg(color::Red), val, style::Reset),
         }
     }
 }
