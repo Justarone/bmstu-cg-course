@@ -14,7 +14,7 @@ pub const SPHERE_PARTS: usize = 10;
 
 pub const ROTATE_VAL: f64 = 0.5;
 pub const MOVE_VAL: f64 = 5.0;
-pub const SCALE_VAL: f64 = 0.8;
+pub const SCALE_VAL: f64 = 1.25;
 
 pub const ATOM_DIFF: f64 = 2.0;
 

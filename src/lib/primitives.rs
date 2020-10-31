@@ -67,6 +67,7 @@ impl Vec3d {
         f64::sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
     }
 
+    #[allow(dead_code)]
     pub fn add_assign(&mut self, other: &Self) {
         self.x += other.x;
         self.y += other.y;
@@ -114,6 +115,7 @@ impl Matrix4 {
         }
     }
 
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             data: [[0.0; 4]; 4],
@@ -203,14 +205,27 @@ impl Transformator for Matrix4 {
 
         *self *= rhs;
 
-        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.into_iter()) {
+        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.iter()) {
             *elem = *copy;
         }
     }
 
     fn scale(&mut self, val: f64) {
-        for i in 0..3 {
-            unsafe { *self.data.get_unchecked_mut(i).get_unchecked_mut(i) *= val; }
+        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
+        for elem in self.data[3][0..2].iter_mut() {
+            *elem = 0_f64;
+        }
+
+        let scale_matrix = Matrix4::from([
+            [val, 0_f64, 0_f64, 0_f64],
+            [0_f64, val, 0_f64, 0_f64],
+            [0_f64, 0_f64, val, 0_f64],
+            [0_f64, 0_f64, 0_f64, 1_f64],
+        ]);
+            
+        *self *= scale_matrix;
+        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.iter()) {
+            *elem = *copy;
         }
     }
 }

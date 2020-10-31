@@ -35,8 +35,7 @@ pub unsafe fn transform_and_flush(points_and_normals: &(Vec<Vec<Point3d>>, Vec<V
         for (change_index, (&new_point, &new_normal)) in (2..).map(|elem| elem % 3)
             .zip(points.iter().skip(2).zip(normals.iter().skip(2))) {
             current_window[change_index] = transform_and_normalize(new_point, new_normal, matrix);
-            if check_pos_all(current_window.iter().map(|elem| elem.0)) && 
-                check_normals_all(current_window.iter().map(|elem| elem.1)) {
+            if check_pos_all(current_window.iter().map(|elem| elem.0)) {
                 // no way to build slice from iterator :(
                 let points = [current_window[0].0, current_window[1].0, current_window[2].0];
                 let normals = [current_window[0].1, current_window[1].1, current_window[2].1];
@@ -175,16 +174,17 @@ where
     !(all_left || all_right || all_down || all_up)
 }
 
+#[allow(dead_code)]
 fn check_normals_all<Iter>(mut normals: Iter) -> bool 
 where 
     Iter: Iterator<Item=Vec3d>,
 {
     if let Some(first) = normals.next() {
-        let mut res = first;
+        let mut res = first.z >= 0_f64;
         for norm in normals {
-            res.add_assign(&norm);
+            res = res || norm.z >= 0_f64;
         }
-        res.z > 0_f64
+        res
     } else {
         false
     }

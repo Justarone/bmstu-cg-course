@@ -26,6 +26,7 @@ impl Muscle {
         muscle
     }
 
+    #[allow(dead_code)]
     pub fn len(&self) -> f64 {
         self.dx * (self.radiuses.len() - 1) as f64
     }
