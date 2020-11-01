@@ -16,12 +16,14 @@ pub struct Controller {
     width: usize,
     pb: Pixbuf,
     muscle: Arc<Mutex<Muscle>>,
+    carcass: Arc<Mutex<Carcass>>,
     matrix: Matrix4,
     cached_muscle: Option<(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>)>,
+    cached_carcass: Option<(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>)>,
 }
 
 impl Controller {
-    pub fn new(pb: Pixbuf, muscle: Arc<Mutex<Muscle>>) -> Self {
+    pub fn new(pb: Pixbuf, muscle: Arc<Mutex<Muscle>>, carcass: Arc<Mutex<Carcass>>) -> Self {
         let mut matrix = Matrix4::identity();
         matrix.mov((constants::WIDTH / 2) as f64, Axis::X);
         matrix.mov((constants::HEIGHT / 2) as f64, Axis::Y);
@@ -30,16 +32,23 @@ impl Controller {
             height: constants::HEIGHT,
             width: constants::WIDTH,
             pb,
+            carcass,
             muscle,
             matrix,
             cached_muscle: None,
+            cached_carcass: None,
         }
     }
 
-    fn deform_muscle(&mut self, diff: f64) {
+    fn deform(&mut self, diff: f64) {
         let mut muscle = self.muscle.lock().unwrap();
-        muscle.deform(diff);
-        self.cached_muscle = Some(muscle.get_points_and_normals());
+        let mut carcass = self.carcass.lock().unwrap();
+        if carcass.check_diff(diff) {
+            carcass.deform(diff);
+            muscle.deform(diff);
+            self.cached_muscle = Some(muscle.get_points_and_normals());
+            self.cached_carcass = Some(carcass.get_points_and_normals());
+        }
     }
 
     pub fn update_pixbuf(&mut self) {
@@ -48,18 +57,26 @@ impl Controller {
             self.cached_muscle = Some(muscle.get_points_and_normals());
         }
 
+        if let None = self.cached_carcass {
+            let carcass = self.carcass.lock().unwrap();
+            self.cached_carcass = Some(carcass.get_points_and_normals());
+        }
+
         unsafe {
             clear_buffers();
             transform_and_flush(self.cached_muscle.as_ref().unwrap(),
-            &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION, 
-            constants::MUSCLE_COLOR); 
+                &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION, 
+                constants::MUSCLE_COLOR); 
+            transform_and_flush(self.cached_carcass.as_ref().unwrap(),
+                &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION,
+                constants::CARCASS_COLOR);
         } 
     }
 
     fn update_matrix(&mut self, operation: Operation, val: f64) {
         match operation {
-            Operation::Scale => self.matrix.scale(val),
-            Operation::Rotate(axis) => self.matrix.rotate(val, axis),
+            Operation::Scale => self.matrix.scale_center(val),
+            Operation::Rotate(axis) => self.matrix.rotate_center(val, axis),
             Operation::Move(axis) => self.matrix.mov(val, axis),
         }
     }
@@ -101,7 +118,7 @@ impl Controller {
                     _ => unreachable!("No way"),
                 };
 
-                self.deform_muscle(diff);
+                self.deform(diff);
                 self.update_pixbuf();
             }
 

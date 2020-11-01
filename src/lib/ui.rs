@@ -42,12 +42,13 @@ pub fn build_ui(app: &gtk::Application) {
     window.add(&fixed);
     drawing_area.set_size_request(constants::WIDTH as i32, constants::HEIGHT as i32);
 
-    let Config { radiuses: rads, grow_mults: gm, len } = read_from_config();
-    let muscle = Arc::new(Mutex::new(Muscle::new(rads, gm, len)));
+    let Config { muscle_config: mconf, carcass_config: cconf } = read_from_config();
+    let muscle = Arc::new(Mutex::new(Muscle::new(mconf.radiuses, mconf.grow_mults, mconf.len)));
+    let carcass = Arc::new(Mutex::new(Carcass::new(cconf.data, cconf.thickness, mconf.len)));
     let pixbuf = Pixbuf::new(Colorspace::Rgb, constants::HAS_ALPHA, constants::BITS_PER_COLOR,
         constants::WIDTH as i32, constants::HEIGHT as i32).unwrap();
 
-    let mut controller = Controller::new(pixbuf.clone(), muscle);
+    let mut controller = Controller::new(pixbuf.clone(), muscle, carcass);
     controller.update_pixbuf();
     let controller = Arc::new(Mutex::new(controller));
 

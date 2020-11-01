@@ -154,6 +154,11 @@ pub trait Transformator {
     fn apply_to_point(&self, point: &mut Point3d);
 }
 
+pub trait CenterTransformator: Transformator {
+    fn rotate_center(&mut self, angle: f64, axis: Axis);
+    fn scale_center(&mut self, val: f64);
+}
+
 impl Transformator for Matrix4 {
     fn apply_to_point(&self, point: &mut Point3d) {
         let old_coords = [point.x, point.y, point.z, 1_f64];
@@ -178,10 +183,6 @@ impl Transformator for Matrix4 {
     }
 
     fn rotate(&mut self, angle: f64, axis: Axis) {
-        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
-        for elem in self.data[3][0..2].iter_mut() {
-            *elem = 0_f64;
-        }
         let rhs = match axis {
             Axis::Y => Matrix4::from([
                 [f64::cos(angle), 0_f64, f64::sin(angle), 0_f64],
@@ -204,18 +205,9 @@ impl Transformator for Matrix4 {
         };
 
         *self *= rhs;
-
-        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.iter()) {
-            *elem = *copy;
-        }
     }
 
     fn scale(&mut self, val: f64) {
-        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
-        for elem in self.data[3][0..2].iter_mut() {
-            *elem = 0_f64;
-        }
-
         let scale_matrix = Matrix4::from([
             [val, 0_f64, 0_f64, 0_f64],
             [0_f64, val, 0_f64, 0_f64],
@@ -224,6 +216,31 @@ impl Transformator for Matrix4 {
         ]);
             
         *self *= scale_matrix;
+    }
+}
+
+impl CenterTransformator for Matrix4 {
+    fn rotate_center(&mut self, angle: f64, axis: Axis) {
+        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
+        for elem in self.data[3][0..2].iter_mut() {
+            *elem = 0_f64;
+        }
+
+        self.rotate(angle, axis);
+
+        for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.iter()) {
+            *elem = *copy;
+        }
+    }
+
+    fn scale_center(&mut self, val: f64) {
+        let pos = [self.data[3][0], self.data[3][1], self.data[3][2]];
+        for elem in self.data[3][0..2].iter_mut() {
+            *elem = 0_f64;
+        }
+
+        self.scale(val);
+
         for (elem, copy) in self.data[3][0..2].iter_mut().zip(pos.iter()) {
             *elem = *copy;
         }
