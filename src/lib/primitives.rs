@@ -1,7 +1,7 @@
 use std::ops::MulAssign;
 
 #[derive(Clone, Copy, Debug)]
-pub struct Point3d { 
+pub struct Point3d {
     pub x: f64,
     pub y: f64,
     pub z: f64,
@@ -23,7 +23,7 @@ impl Default for Point3d {
 pub struct IntYPoint3d {
     pub x: f64,
     pub y: u16,
-    pub z: f64
+    pub z: f64,
 }
 
 impl From<Point3d> for IntYPoint3d {
@@ -37,7 +37,7 @@ impl From<Point3d> for IntYPoint3d {
 }
 
 #[derive(Clone, Copy, Debug)]
-pub struct Vec3d { 
+pub struct Vec3d {
     pub x: f64,
     pub y: f64,
     pub z: f64,
@@ -85,7 +85,7 @@ impl Default for Vec3d {
     }
 }
 
-pub struct Vec2d { 
+pub struct Vec2d {
     pub x: f64,
     pub y: f64,
 }
@@ -97,7 +97,9 @@ impl Vec2d {
 }
 
 pub enum Axis {
-    X, Y, Z,
+    X,
+    Y,
+    Z,
 }
 
 #[derive(Clone)]
@@ -108,10 +110,12 @@ pub struct Matrix4 {
 impl Matrix4 {
     pub fn identity() -> Self {
         Self {
-            data: [[1.0, 0.0, 0.0, 0.0],
-                   [0.0, 1.0, 0.0, 0.0],
-                   [0.0, 0.0, 1.0, 0.0],
-                   [0.0, 0.0, 0.0, 1.0]],
+            data: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ],
         }
     }
 
@@ -125,9 +129,7 @@ impl Matrix4 {
 
 impl From<[[f64; 4]; 4]> for Matrix4 {
     fn from(data: [[f64; 4]; 4]) -> Self {
-        Self {
-            data,
-        }
+        Self { data }
     }
 }
 
@@ -214,7 +216,7 @@ impl Transformator for Matrix4 {
             [0_f64, 0_f64, val, 0_f64],
             [0_f64, 0_f64, 0_f64, 1_f64],
         ]);
-            
+
         *self *= scale_matrix;
     }
 }

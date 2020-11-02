@@ -1,5 +1,5 @@
-use std::sync::{ Arc, Mutex };
-use termion::{ style, color };
+use std::sync::{Arc, Mutex};
+use termion::{color, style};
 
 use super::prelude::*;
 use keys::*;
@@ -64,13 +64,21 @@ impl Controller {
 
         unsafe {
             clear_buffers();
-            transform_and_flush(self.cached_muscle.as_ref().unwrap(),
-                &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION, 
-                constants::MUSCLE_COLOR); 
-            transform_and_flush(self.cached_carcass.as_ref().unwrap(),
-                &self.matrix, self.pb.clone(), constants::LIGHT_SOURCE_DIRECTION,
-                constants::CARCASS_COLOR);
-        } 
+            transform_and_flush(
+                self.cached_muscle.as_ref().unwrap(),
+                &self.matrix,
+                self.pb.clone(),
+                constants::LIGHT_SOURCE_DIRECTION,
+                constants::MUSCLE_COLOR,
+            );
+            transform_and_flush(
+                self.cached_carcass.as_ref().unwrap(),
+                &self.matrix,
+                self.pb.clone(),
+                constants::LIGHT_SOURCE_DIRECTION,
+                constants::CARCASS_COLOR,
+            );
+        }
     }
 
     fn update_matrix(&mut self, operation: Operation, val: f64) {
@@ -123,8 +131,12 @@ impl Controller {
             }
 
             // unknown keys
-            val => println!("{}Unknown command: {}{}", color::Fg(color::Red), val, style::Reset),
+            val => println!(
+                "{}Unknown command: {}{}",
+                color::Fg(color::Red),
+                val,
+                style::Reset
+            ),
         }
     }
 }
-

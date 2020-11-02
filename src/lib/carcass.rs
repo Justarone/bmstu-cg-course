@@ -9,13 +9,15 @@ pub struct Carcass {
 impl Carcass {
     pub fn new(data: [[f64; 2]; 2], thickness: f64, cur_len: f64) -> Self {
         Self {
-            data, thickness, cur_len
+            data,
+            thickness,
+            cur_len,
         }
     }
 
     pub fn check_diff(&self, diff: f64) -> bool {
-        self.cur_len + diff < self.data[0][1] + self.data[1][0] &&
-            self.cur_len + diff > f64::abs(self.data[0][1] - self.data[1][0])
+        self.cur_len + diff < self.data[0][1] + self.data[1][0]
+            && self.cur_len + diff > f64::abs(self.data[0][1] - self.data[1][0])
     }
 
     pub fn deform(&mut self, diff: f64) {
@@ -74,10 +76,23 @@ impl Carcass {
         (points, normals)
     }
 
-    fn create_tube(&self, points: &mut Vec<Vec<Point3d>>, normals: &mut Vec<Vec<Point3d>>, len: f64) {
-        let (tube_points, tube_normals) = rotate_intersections(&[Point3d::new(0_f64, self.thickness, 0_f64),
-            Point3d::new(len, self.thickness, 0_f64)], &[Point3d::new(0_f64, 0_f64, 0_f64),
-            Point3d::new(len, 0_f64, 0_f64)], constants::CARCASS_STEP);
+    fn create_tube(
+        &self,
+        points: &mut Vec<Vec<Point3d>>,
+        normals: &mut Vec<Vec<Point3d>>,
+        len: f64,
+    ) {
+        let (tube_points, tube_normals) = rotate_intersections(
+            &[
+                Point3d::new(0_f64, self.thickness, 0_f64),
+                Point3d::new(len, self.thickness, 0_f64),
+            ],
+            &[
+                Point3d::new(0_f64, 0_f64, 0_f64),
+                Point3d::new(len, 0_f64, 0_f64),
+            ],
+            constants::CARCASS_STEP,
+        );
         points.push(tube_points);
         normals.push(tube_normals);
     }

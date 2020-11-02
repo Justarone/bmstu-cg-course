@@ -1,7 +1,6 @@
 use super::prelude::*;
 use std::vec::Vec;
 
-
 pub struct Muscle {
     radiuses: Vec<f64>,
     grow_mults: Vec<f64>,
@@ -43,7 +42,7 @@ impl Muscle {
         let b = self.find_b();
         let c = self.find_c(g2);
 
-        //let dy = dy_stub(self.dx > new_dx); 
+        //let dy = dy_stub(self.dx > new_dx);
         let dy = solve_quad_eq(a, b, c);
         if let Some(dy) = dy.1 {
             self.update_radiuses(dy);
@@ -51,14 +50,22 @@ impl Muscle {
         }
     }
 
-    fn fill_pn_connectors(&self, points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>) {
+    fn fill_pn_connectors(
+        &self,
+        points: &mut Vec<Vec<Point3d>>,
+        normal2points: &mut Vec<Vec<Point3d>>,
+    ) {
         for i in 0..(self.radiuses.len() - 1) {
             let (p1, p2) = self.find_intersections(i, i + 1);
 
-            let (mut new_points, mut new_norm2points) = rotate_intersections(&[p1, p2],
-                &[Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
-                Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)], // center of (i + 1)-th sphere
-                constants::MUSCLE_STEP);
+            let (mut new_points, mut new_norm2points) = rotate_intersections(
+                &[p1, p2],
+                &[
+                    Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
+                    Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64),
+                ], // center of (i + 1)-th sphere
+                constants::MUSCLE_STEP,
+            );
             cycle_extend(&mut new_points, 2);
             cycle_extend(&mut new_norm2points, 2);
 
@@ -67,16 +74,24 @@ impl Muscle {
         }
     }
 
-    fn fill_pn_spheres(&self, points: &mut Vec<Vec<Point3d>>, normal2points: &mut Vec<Vec<Point3d>>) {
+    fn fill_pn_spheres(
+        &self,
+        points: &mut Vec<Vec<Point3d>>,
+        normal2points: &mut Vec<Vec<Point3d>>,
+    ) {
         let index_arr = [0, self.radiuses.len() - 1];
-        for (center, rad) in index_arr.iter().map(|&index| (self.dx * index as f64, self.radiuses[index])) {
+        for (center, rad) in index_arr
+            .iter()
+            .map(|&index| (self.dx * index as f64, self.radiuses[index]))
+        {
             add_uv_sphere(points, normal2points, center, rad);
         }
     }
 
     pub fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
-        let mut points =  Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
-        let mut normal2points = Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
+        let mut points = Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
+        let mut normal2points =
+            Vec::with_capacity(self.radiuses.len() * (constants::SPHERE_PARTS) - 1);
         self.fill_pn_connectors(&mut points, &mut normal2points);
         self.fill_pn_spheres(&mut points, &mut normal2points);
 
@@ -124,7 +139,7 @@ impl Muscle {
 
         res - g
     }
-    
+
     fn update_radiuses(&mut self, dy: f64) {
         for (rad, mult) in self.radiuses.iter_mut().zip(self.grow_mults.iter()) {
             *rad += mult * dy;
@@ -144,8 +159,18 @@ impl Muscle {
         let cos_alpha = f64::sqrt(1_f64 - sin_alpha * sin_alpha);
         let d = Vec2d::new(sin_alpha, cos_alpha);
 
-        (Point3d::new(c1x + d.x * self.radiuses[i1], d.y * self.radiuses[i1], 0_f64),
-            Point3d::new( c2x + d.x * self.radiuses[i2], d.y * self.radiuses[i2], 0_f64))
+        (
+            Point3d::new(
+                c1x + d.x * self.radiuses[i1],
+                d.y * self.radiuses[i1],
+                0_f64,
+            ),
+            Point3d::new(
+                c2x + d.x * self.radiuses[i2],
+                d.y * self.radiuses[i2],
+                0_f64,
+            ),
+        )
     }
 
     fn find_intersections(&self, mut i1: usize, mut i2: usize) -> (Point3d, Point3d) {
@@ -153,7 +178,9 @@ impl Muscle {
             std::mem::swap(&mut i1, &mut i2);
         }
 
-        (Point3d::new(self.dx * i1 as f64, self.radiuses[i1], 0_f64),
-            Point3d::new(self.dx * i2 as f64, self.radiuses[i2], 0_f64))
+        (
+            Point3d::new(self.dx * i1 as f64, self.radiuses[i1], 0_f64),
+            Point3d::new(self.dx * i2 as f64, self.radiuses[i2], 0_f64),
+        )
     }
 }

@@ -1,24 +1,28 @@
-mod ui;
+mod carcass;
+mod cg;
+pub mod constants;
 mod controller;
 mod muscle;
-mod carcass;
 mod primitives;
-mod utils;
-mod cg;
 mod stubs;
-pub mod constants;
+mod ui;
+mod utils;
 
 pub mod prelude {
-    pub use super::ui::{ build_ui, process_key };
+    pub use super::cg::{clear_buffers, transform_and_flush};
+    pub use super::constants;
+    pub use super::constants::keys;
     pub use super::controller::Controller;
     pub use super::muscle::Muscle;
-    pub use super::primitives::{ Transformator, CenterTransformator, Point3d, IntYPoint3d,
-        Vec2d, Vec3d, Matrix4, Axis, Section };
-    pub use super::constants;
-    pub use super::utils::{ solve_quad_eq, MuscleConfig, CarcassConfig, Config, read_from_config,
-        cycle_extend, add_uv_sphere, rotate_intersections, angle_from_triangle };
-    pub use super::constants::keys;
-    pub use super::cg::{ transform_and_flush, clear_buffers };
+    pub use super::primitives::{
+        Axis, CenterTransformator, IntYPoint3d, Matrix4, Point3d, Section, Transformator, Vec2d,
+        Vec3d,
+    };
+    pub use super::ui::{build_ui, process_key};
+    pub use super::utils::{
+        add_uv_sphere, angle_from_triangle, cycle_extend, read_from_config, rotate_intersections,
+        solve_quad_eq, CarcassConfig, Config, MuscleConfig,
+    };
     //pub use super::stubs::{ dy_stub };
     pub use super::carcass::Carcass;
 
