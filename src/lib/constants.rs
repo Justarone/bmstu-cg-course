@@ -8,11 +8,17 @@ pub const HAS_ALPHA: bool = true;
 pub const MIN_PART: f64 = 0.4;
 pub const MAX_PART: f64 = 2.5;
 
-pub const DEGREES: usize = 360;
-pub const STEP: usize = 10;
-pub const SPHERE_PARTS: usize = 10;
+pub const NEGATIVE_Z_PROJECTION: f64 = -0.2;
 
-pub const ROTATE_VAL: f64 = 0.5;
+pub const DEGREES: usize = 360;
+
+pub const MUSCLE_STEP: usize = 10;
+pub const CARCASS_STEP: usize = 45;
+pub const SPHERE_STEP: usize = 20;
+
+pub const SPHERE_PARTS: usize = 8;
+
+pub const ROTATE_VAL: f64 = 0.1;
 pub const MOVE_VAL: f64 = 5.0;
 pub const SCALE_VAL: f64 = 1.25;
 
@@ -20,11 +26,11 @@ pub const ATOM_DIFF: f64 = 2.0;
 
 pub const MIN_Z: f64 = f64::MIN;
 pub const DEFAULT_COLOR: u32 = 0x1E1E1EFF;
-pub const MUSCLE_COLOR: u32 = 0x800000FF;
-pub const CARCASS_COLOR: u32 = 0x808080FF;
+pub const MUSCLE_COLOR: u32 = 0xCC0000FF;
+pub const CARCASS_COLOR: u32 = 0xCCCCCCFF;
 
-pub const ZERO_BRIGHTNESS: f64 = 0.8;
-pub const BRIGHTNESS_RANGE: f64 = 0.5;
+pub const ZERO_BRIGHTNESS: f64 = 0.6;
+pub const BRIGHTNESS_RANGE: f64 = 0.4;
 
 pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "main.yaml"];
 

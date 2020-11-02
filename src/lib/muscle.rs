@@ -57,7 +57,8 @@ impl Muscle {
 
             let (mut new_points, mut new_norm2points) = rotate_intersections(&[p1, p2],
                 &[Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
-                Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)]); // center of (i + 1)-th sphere
+                Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64)], // center of (i + 1)-th sphere
+                constants::MUSCLE_STEP);
             cycle_extend(&mut new_points, 2);
             cycle_extend(&mut new_norm2points, 2);
 
