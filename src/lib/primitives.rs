@@ -22,7 +22,7 @@ impl Default for Point3d {
 #[derive(Debug)]
 pub struct IntYPoint3d {
     pub x: f64,
-    pub y: u16,
+    pub y: i16,
     pub z: f64,
 }
 
@@ -30,7 +30,7 @@ impl From<Point3d> for IntYPoint3d {
     fn from(point: Point3d) -> Self {
         Self {
             x: point.x,
-            y: f64::round(point.y) as u16,
+            y: f64::round(point.y) as i16,
             z: point.z,
         }
     }
@@ -250,8 +250,8 @@ impl CenterTransformator for Matrix4 {
 }
 
 pub struct Section {
-    pub y_start: u16,
-    pub y_end: u16,
+    pub y_start: i16,
+    pub y_end: i16,
     pub x_start: f64,
     pub x_step: f64,
     pub z_start: f64,

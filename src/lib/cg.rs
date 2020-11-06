@@ -101,8 +101,19 @@ unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
         if pair[0].x_start > pair[1].x_start {
             continue;
         }
-        for y in ((pair[0].y_start as usize)..=(pair[0].y_end as usize))
-            .filter(|&y| y < constants::HEIGHT)
+
+        if pair[0].y_start < 0 {
+            let diff = (-pair[0].y_start) as f64;
+            for sec in pair.iter_mut() {
+                sec.x_start += diff * sec.x_step;
+                sec.br_start += diff * sec.br_step;
+                sec.z_start += diff * sec.z_step;
+            }
+            pair[0].y_start = 0;
+        }
+
+        for y in (pair[0].y_start..=pair[0].y_end).filter(|&elem| elem < constants::HEIGHT as i16)
+            .map(|y| y as usize)
         {
             let x_from = f64::round(pair[0].x_start) as usize;
             let x_to = f64::round(pair[1].x_start) as usize;
@@ -246,7 +257,7 @@ unsafe fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3
     }
 }
 
-fn find_midpoint2(min: &IntYPoint3d, max: &IntYPoint3d, mid_y: u16) -> IntYPoint3d {
+fn find_midpoint2(min: &IntYPoint3d, max: &IntYPoint3d, mid_y: i16) -> IntYPoint3d {
     let mult = if max.y == min.y {
         1.0
     } else {
