@@ -1,5 +1,7 @@
 use std::sync::{Arc, Mutex};
 use termion::{color, style};
+use std::time::Instant;
+use log::debug;
 
 use super::prelude::*;
 use keys::*;
@@ -63,21 +65,31 @@ impl Controller {
         }
 
         unsafe {
+            debug!("{}=================== DRAW ROUTINES ======================", color::Fg(color::Yellow));
+            let time = Instant::now();
             clear_buffers();
-            transform_and_flush(
+            debug!("Clear buffers: {} ms", time.elapsed().as_millis());
+            let time = Instant::now();
+            transform_and_add(
                 self.cached_muscle.as_ref().unwrap(),
                 &self.matrix,
-                self.pb.clone(),
                 constants::LIGHT_SOURCE_DIRECTION,
                 constants::MUSCLE_COLOR,
             );
-            transform_and_flush(
+            debug!("Transform and add muscle: {} ms", time.elapsed().as_millis());
+            let time = Instant::now();
+            transform_and_add(
                 self.cached_carcass.as_ref().unwrap(),
                 &self.matrix,
-                self.pb.clone(),
                 constants::LIGHT_SOURCE_DIRECTION,
                 constants::CARCASS_COLOR,
             );
+            debug!("Transform and add carcass: {} ms", time.elapsed().as_millis());
+
+            let time = Instant::now();
+            flush(self.pb.clone());
+            debug!("Flush: {} ms", time.elapsed().as_millis());
+            debug!("{}========================================================", color::Fg(color::Yellow));
         }
     }
 
@@ -90,6 +102,7 @@ impl Controller {
     }
 
     pub fn process_key(&mut self, key: &gdk::EventKey) {
+        let time = Instant::now();
         let key = key.get_hardware_keycode();
         match key {
             // operations only with transformation matrix
@@ -115,6 +128,7 @@ impl Controller {
                 };
 
                 self.update_matrix(operation, val);
+                debug!("{}MATRIX UPDATE TIME: {} ms", color::Fg(color::Magenta), time.elapsed().as_millis());
                 self.update_pixbuf();
             }
 
@@ -127,6 +141,7 @@ impl Controller {
                 };
 
                 self.deform(diff);
+                debug!("{}DEFORM TIME: {} ms", color::Fg(color::LightMagenta), time.elapsed().as_millis());
                 self.update_pixbuf();
             }
 
@@ -138,5 +153,6 @@ impl Controller {
                 style::Reset
             ),
         }
+        debug!("{}{}TOTAL PROCESSING TIME: {} ms", color::Fg(color::Red), style::Bold, time.elapsed().as_millis());
     }
 }

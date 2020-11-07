@@ -9,7 +9,7 @@ mod ui;
 mod utils;
 
 pub mod prelude {
-    pub use super::cg::{clear_buffers, transform_and_flush};
+    pub use super::cg::{clear_buffers, transform_and_add, flush};
     pub use super::constants;
     pub use super::constants::keys;
     pub use super::controller::Controller;

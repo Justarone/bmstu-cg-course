@@ -21,10 +21,9 @@ pub unsafe fn clear_buffers() {
     }
 }
 
-pub unsafe fn transform_and_flush(
+pub unsafe fn transform_and_add(
     points_and_normals: &(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>),
     matrix: &Matrix4,
-    pb: Pixbuf,
     light_source: Vec3d,
     color: u32,
 ) {
@@ -60,11 +59,9 @@ pub unsafe fn transform_and_flush(
             }
         }
     }
-
-    flush(pb);
 }
 
-unsafe fn flush(pb: Pixbuf) {
+pub unsafe fn flush(pb: Pixbuf) {
     for (i, line) in color_buffer.iter().enumerate() {
         for (j, pixel) in line.iter().enumerate() {
             pb.put_pixel(
