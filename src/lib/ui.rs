@@ -11,13 +11,13 @@ macro_rules! clone {
     ($($n:ident),+ => move || $body:expr) => (
         {
             $( let $n = $n.clone(); )+
-            move || $body
+                move || $body
         }
     );
     ($($n:ident),+ => move |$($p:tt),+| $body:expr) => (
         {
             $( let $n = $n.clone(); )+
-            move |$(clone!(@param $p),)+| $body
+                move |$(clone!(@param $p),)+| $body
         }
     );
 }
@@ -50,14 +50,14 @@ pub fn build_ui(app: &gtk::Application) {
         carcass_config: cconf,
     } = read_from_config();
     let muscle = Arc::new(Mutex::new(Muscle::new(
-        mconf.radiuses,
-        mconf.grow_mults,
-        mconf.len,
+                mconf.radiuses,
+                mconf.grow_mults,
+                mconf.len,
     )));
     let carcass = Arc::new(Mutex::new(Carcass::new(
-        cconf.data,
-        cconf.thickness,
-        mconf.len,
+                cconf.data,
+                cconf.thickness,
+                mconf.len,
     )));
     let pixbuf = Pixbuf::new(
         Colorspace::Rgb,
@@ -66,21 +66,21 @@ pub fn build_ui(app: &gtk::Application) {
         constants::WIDTH as i32,
         constants::HEIGHT as i32,
     )
-    .unwrap();
+        .unwrap();
 
     let mut controller = Controller::new(pixbuf.clone(), muscle, carcass);
     controller.update_pixbuf();
     let controller = Arc::new(Mutex::new(controller));
 
     drawing_area.connect_draw(clone!(pixbuf => move |_, context| {
-            context.set_source_pixbuf(&pixbuf, 0_f64, 0_f64);
-            context.paint();
-            Inhibit(false)
+        context.set_source_pixbuf(&pixbuf, 0_f64, 0_f64);
+        context.paint();
+        Inhibit(false)
     }));
 
     window.connect_key_press_event(clone!(controller, drawing_area => move |_, key| {
-            process_key(&controller, &drawing_area, key);
-            Inhibit(false)
+        process_key(&controller, &drawing_area, key);
+        Inhibit(false)
     }));
 
     window.show_all();
