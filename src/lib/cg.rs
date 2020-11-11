@@ -171,13 +171,18 @@ unsafe fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3])
 }
 
 unsafe fn find_brightnesses(normals: [Vec3d; 3], light_source: &Vec3d) -> [f64; 3] {
+    let mut br_vec = Vec3d::new(0.0, 0.0, 0.0);
+    for norm in normals.iter() {
+        br_vec.add_assign(norm);
+    }
+    let br = br_vec.scalar_mul(light_source);
     [
         constants::ZERO_BRIGHTNESS
-            + constants::BRIGHTNESS_RANGE * (normals[0].scalar_mul(light_source)),
+            + constants::BRIGHTNESS_RANGE * br,
             constants::ZERO_BRIGHTNESS
-                + constants::BRIGHTNESS_RANGE * (normals[1].scalar_mul(light_source)),
+                + constants::BRIGHTNESS_RANGE * br,
                 constants::ZERO_BRIGHTNESS
-                    + constants::BRIGHTNESS_RANGE * (normals[2].scalar_mul(light_source)),
+                    + constants::BRIGHTNESS_RANGE * br,
     ]
 }
 

@@ -12,7 +12,7 @@ pub const NEGATIVE_Z_PROJECTION: f64 = -0.2;
 
 pub const DEGREES: usize = 360;
 
-pub const MUSCLE_STEP: usize = 10;
+pub const MUSCLE_STEP: usize = 20;
 pub const CARCASS_STEP: usize = 45;
 pub const SPHERE_STEP: usize = 20;
 
@@ -26,11 +26,11 @@ pub const ATOM_DIFF: f64 = 2.0;
 
 pub const MIN_Z: f64 = f64::MIN;
 pub const DEFAULT_COLOR: u32 = 0x1E1E1EFF;
-pub const MUSCLE_COLOR: u32 = 0xCC0000FF;
 pub const CARCASS_COLOR: u32 = 0xCCCCCCFF;
+pub const MUSCLE_COLOR: u32 = CARCASS_COLOR;
 
-pub const ZERO_BRIGHTNESS: f64 = 0.6;
-pub const BRIGHTNESS_RANGE: f64 = 0.4;
+pub const ZERO_BRIGHTNESS: f64 = 0.8;
+pub const BRIGHTNESS_RANGE: f64 = 0.2;
 
 pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "main.yaml"];
 
