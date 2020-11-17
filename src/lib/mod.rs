@@ -13,7 +13,7 @@ pub mod prelude {
     pub use super::constants;
     pub use super::constants::keys;
     pub use super::controller::Controller;
-    pub use super::muscle::Muscle;
+    pub use super::muscle::{ Muscle, MOParams, MuscleOperation };
     pub use super::primitives::{
         Axis, CenterTransformator, IntYPoint3d, Matrix4, Point3d, Section, Transformator, Vec2d,
         Vec3d,

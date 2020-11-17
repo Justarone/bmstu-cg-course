@@ -62,3 +62,54 @@ pub mod keys {
     pub const X: u16 = 53;
     pub const V: u16 = 55;
 }
+
+pub const COMMANDS_BUTTONS_AMOUNT: usize = 16;
+pub const COMMANDS_BUTTONS: [&str; COMMANDS_BUTTONS_AMOUNT] = [
+    "move_left",
+    "move_up",
+    "move_back",
+    "move_right",
+    "move_down",
+    "move_front",
+    "rotate_left",
+    "rotate_up",
+    "rotate_clockwise",
+    "rotate_right",
+    "rotate_down",
+    "rotate_unclockwise",
+    "scale_up",
+    "scale_down",
+    "lengthen",
+    "shorten",
+];
+
+pub const CMDS_BTNS_KEY_MAP: [u16; COMMANDS_BUTTONS_AMOUNT] = [
+    keys::A,
+    keys::W,
+    keys::E,
+    keys::D,
+    keys::S,
+    keys::Q,
+    keys::H,
+    keys::K,
+    keys::T,
+    keys::L,
+    keys::J,
+    keys::F,
+    keys::P,
+    keys::M,
+    keys::V,
+    keys::X,
+];
+
+pub const INPUTS_AMOUNT: usize = 3;
+pub const POS_INPUT: usize = 0;
+pub const RAD_INPUT: usize = 1;
+pub const GM_INPUT: usize = 2;
+pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = ["pos_input", "rad_input", "gm_input"];
+
+pub const RBTNS_AMOUNT: usize = 3;
+pub const ADD_BTN: usize = 0;
+pub const DEL_BTN: usize = 1;
+pub const MOD_BTN: usize = 2;
+pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = ["add_btn", "del_btn", "mod_btn"];

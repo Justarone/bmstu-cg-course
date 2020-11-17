@@ -42,6 +42,13 @@ impl Controller {
         }
     }
 
+    pub fn restruct_muscle(&mut self, mo: MuscleOperation) -> Result<(), String> {
+        let mut muscle = self.muscle.lock().unwrap();
+        muscle.restruct(mo)?;
+        self.cached_muscle = Some(muscle.get_points_and_normals());
+        Ok(())
+    }
+
     fn deform(&mut self, diff: f64) {
         let mut muscle = self.muscle.lock().unwrap();
         let mut carcass = self.carcass.lock().unwrap();
@@ -101,9 +108,8 @@ impl Controller {
         }
     }
 
-    pub fn process_key(&mut self, key: &gdk::EventKey) {
+    pub fn process_key(&mut self, key: u16) {
         let time = Instant::now();
-        let key = key.get_hardware_keycode();
         match key {
             // operations only with transformation matrix
             H | L | J | K | F | T | A | S | D | W | Q | E | P | M => {

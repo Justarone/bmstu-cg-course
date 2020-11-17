@@ -7,22 +7,40 @@ pub struct Muscle {
     dx: f64,
     min_dx: f64,
     max_dx: f64,
-    volume: f64,
+}
+
+pub enum MuscleOperation {
+    Add(MOParams),
+    Mod(MOParams),
+    Del(usize),
+}
+
+pub struct MOParams {
+    pos: usize,
+    rad: f64,
+    gm: f64,
+}
+
+impl MOParams {
+    pub fn new(pos: usize, rad: f64, gm: f64) -> Self {
+        Self {
+            pos,
+            rad,
+            gm,
+        }
+    }
 }
 
 impl Muscle {
     pub fn new(radiuses: Vec<f64>, grow_mults: Vec<f64>, len: f64) -> Self {
         let dx = len / (radiuses.len() - 1) as f64;
-        let mut muscle = Self {
+        Self {
             radiuses,
             grow_mults,
             dx,
             min_dx: dx * constants::MIN_PART,
             max_dx: dx * constants::MAX_PART,
-            volume: f64::default(),
-        };
-        muscle.volume = muscle.find_volume();
-        muscle
+        }
     }
 
     #[allow(dead_code)]
@@ -47,6 +65,46 @@ impl Muscle {
         if let Some(dy) = dy.1 {
             self.update_radiuses(dy);
             self.dx = new_dx;
+        }
+    }
+
+    pub fn restruct(&mut self, mo: MuscleOperation) -> Result<(), String> {
+        let len = self.dx * (self.radiuses.len() - 1) as f64;
+        match mo {
+            MuscleOperation::Del(pos) => {
+                if pos > self.radiuses.len() - 1 || self.radiuses.len() < 3 {
+                    return Err(format!("Can't delete!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                }
+                self.radiuses.remove(pos);
+                self.grow_mults.remove(pos);
+
+                self.dx = len / (self.radiuses.len() - 1) as f64;
+                self.min_dx = self.dx * constants::MIN_PART;
+                self.max_dx = self.dx * constants::MAX_PART;
+
+                Ok(())
+            }
+            MuscleOperation::Mod(MOParams { pos, rad, gm }) => {
+                if pos > self.radiuses.len() - 1 {
+                    return Err(format!("Can't modify!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                }
+                self.radiuses[pos] = rad;
+                self.grow_mults[pos] = gm;
+                Ok(())
+            }
+            MuscleOperation::Add(MOParams { pos, rad, gm }) => {
+                if pos > self.radiuses.len() {
+                    return Err(format!("Can't add!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                }
+                self.radiuses.insert(pos, rad);
+                self.grow_mults.insert(pos, gm);
+
+                self.dx = len / (self.radiuses.len() - 1) as f64;
+                self.min_dx = self.dx * constants::MIN_PART;
+                self.max_dx = self.dx * constants::MAX_PART;
+
+                Ok(())
+            }
         }
     }
 
