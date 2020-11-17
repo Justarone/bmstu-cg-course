@@ -68,12 +68,19 @@ impl Muscle {
         }
     }
 
+    pub fn get_node(&self, pos: usize) -> Result<(f64, f64), String> {
+        if pos >= self.radiuses.len() {
+            return Err(format!("Bad pos!\npos: {};\nnumber of nodes: {}.", pos, self.radiuses.len()))
+        }
+        Ok((self.radiuses[pos], self.grow_mults[pos]))
+    }
+
     pub fn restruct(&mut self, mo: MuscleOperation) -> Result<(), String> {
         let len = self.dx * (self.radiuses.len() - 1) as f64;
         match mo {
             MuscleOperation::Del(pos) => {
                 if pos > self.radiuses.len() - 1 || self.radiuses.len() < 3 {
-                    return Err(format!("Can't delete!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                    return Err(format!("Can't delete!\npos: {};\nnumber of nodes: {}", pos, self.radiuses.len()))
                 }
                 self.radiuses.remove(pos);
                 self.grow_mults.remove(pos);
@@ -86,7 +93,7 @@ impl Muscle {
             }
             MuscleOperation::Mod(MOParams { pos, rad, gm }) => {
                 if pos > self.radiuses.len() - 1 {
-                    return Err(format!("Can't modify!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                    return Err(format!("Can't modify!\npos: {};\nnumber of nodes: {}", pos, self.radiuses.len()))
                 }
                 self.radiuses[pos] = rad;
                 self.grow_mults[pos] = gm;

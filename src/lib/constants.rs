@@ -108,8 +108,14 @@ pub const RAD_INPUT: usize = 1;
 pub const GM_INPUT: usize = 2;
 pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = ["pos_input", "rad_input", "gm_input"];
 
-pub const RBTNS_AMOUNT: usize = 3;
+pub const RBTNS_AMOUNT: usize = 7;
 pub const ADD_BTN: usize = 0;
 pub const DEL_BTN: usize = 1;
 pub const MOD_BTN: usize = 2;
-pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = ["add_btn", "del_btn", "mod_btn"];
+pub const MODP_BTN: usize = 3;
+pub const MODM_BTN: usize = 4;
+pub const NEXT_BTN: usize = 5;
+pub const PREV_BTN: usize = 6;
+pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = ["add_btn", "del_btn", "mod_btn", "modp_btn", "modm_btn", "next_btn", "prev_btn"];
+
+pub const DELTA_RAD: f64 = 1.0;

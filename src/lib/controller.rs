@@ -49,6 +49,10 @@ impl Controller {
         Ok(())
     }
 
+    pub fn get_node(&self, pos: usize) -> Result<(f64, f64), String> {
+        self.muscle.lock().unwrap().get_node(pos)
+    }
+
     fn deform(&mut self, diff: f64) {
         let mut muscle = self.muscle.lock().unwrap();
         let mut carcass = self.carcass.lock().unwrap();

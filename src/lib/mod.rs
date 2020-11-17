@@ -25,6 +25,5 @@ pub mod prelude {
     };
     //pub use super::stubs::{ dy_stub };
     pub use super::carcass::Carcass;
-
     pub use gdk_pixbuf::Pixbuf;
 }
