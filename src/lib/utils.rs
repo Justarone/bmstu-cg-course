@@ -100,7 +100,7 @@ pub fn rotate_intersections(
     let mut points = Vec::with_capacity(constants::DEGREES / step * 2);
     let mut normal2points = Vec::with_capacity(constants::DEGREES / step * 2);
 
-    for angle in (0..=constants::DEGREES)
+    for angle in (0..constants::DEGREES)
         .step_by(step)
         .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64)
     {

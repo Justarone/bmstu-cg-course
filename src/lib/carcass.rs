@@ -82,7 +82,7 @@ impl Carcass {
         normals: &mut Vec<Vec<Point3d>>,
         len: f64,
     ) {
-        let (tube_points, tube_normals) = rotate_intersections(
+        let (mut tube_points, mut tube_normals) = rotate_intersections(
             &[
                 Point3d::new(0_f64, self.thickness, 0_f64),
                 Point3d::new(len, self.thickness, 0_f64),
@@ -93,6 +93,8 @@ impl Carcass {
             ],
             constants::CARCASS_STEP,
         );
+        cycle_extend(&mut tube_points, 2);
+        cycle_extend(&mut tube_normals, 2);
         points.push(tube_points);
         normals.push(tube_normals);
     }
