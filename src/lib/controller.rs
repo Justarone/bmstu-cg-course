@@ -1,7 +1,7 @@
-use std::sync::{Arc, Mutex};
-use termion::{color, style};
-use std::time::Instant;
 use log::debug;
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
+use termion::{color, style};
 
 use super::prelude::*;
 use keys::*;
@@ -76,7 +76,10 @@ impl Controller {
         }
 
         unsafe {
-            debug!("{}=================== DRAW ROUTINES ======================", color::Fg(color::Yellow));
+            debug!(
+                "{}=================== DRAW ROUTINES ======================",
+                color::Fg(color::Yellow)
+            );
             let time = Instant::now();
             clear_buffers();
             debug!("Clear buffers: {} ms", time.elapsed().as_millis());
@@ -87,7 +90,10 @@ impl Controller {
                 constants::LIGHT_SOURCE_DIRECTION,
                 constants::MUSCLE_COLOR,
             );
-            debug!("Transform and add muscle: {} ms", time.elapsed().as_millis());
+            debug!(
+                "Transform and add muscle: {} ms",
+                time.elapsed().as_millis()
+            );
             let time = Instant::now();
             transform_and_add(
                 self.cached_carcass.as_ref().unwrap(),
@@ -95,12 +101,18 @@ impl Controller {
                 constants::LIGHT_SOURCE_DIRECTION,
                 constants::CARCASS_COLOR,
             );
-            debug!("Transform and add carcass: {} ms", time.elapsed().as_millis());
+            debug!(
+                "Transform and add carcass: {} ms",
+                time.elapsed().as_millis()
+            );
 
             let time = Instant::now();
             flush(self.pb.clone());
             debug!("Flush: {} ms", time.elapsed().as_millis());
-            debug!("{}========================================================", color::Fg(color::Yellow));
+            debug!(
+                "{}========================================================",
+                color::Fg(color::Yellow)
+            );
         }
     }
 
@@ -138,7 +150,11 @@ impl Controller {
                 };
 
                 self.update_matrix(operation, val);
-                debug!("{}MATRIX UPDATE TIME: {} ms", color::Fg(color::Magenta), time.elapsed().as_millis());
+                debug!(
+                    "{}MATRIX UPDATE TIME: {} ms",
+                    color::Fg(color::Magenta),
+                    time.elapsed().as_millis()
+                );
                 self.update_pixbuf();
             }
 
@@ -151,7 +167,11 @@ impl Controller {
                 };
 
                 self.deform(diff);
-                debug!("{}DEFORM TIME: {} ms", color::Fg(color::LightMagenta), time.elapsed().as_millis());
+                debug!(
+                    "{}DEFORM TIME: {} ms",
+                    color::Fg(color::LightMagenta),
+                    time.elapsed().as_millis()
+                );
                 self.update_pixbuf();
             }
 
@@ -163,6 +183,11 @@ impl Controller {
                 style::Reset
             ),
         }
-        debug!("{}{}TOTAL PROCESSING TIME: {} ms", color::Fg(color::Red), style::Bold, time.elapsed().as_millis());
+        debug!(
+            "{}{}TOTAL PROCESSING TIME: {} ms",
+            color::Fg(color::Red),
+            style::Bold,
+            time.elapsed().as_millis()
+        );
     }
 }

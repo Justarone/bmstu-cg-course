@@ -102,18 +102,18 @@ pub fn rotate_intersections(
 
     for angle in (0..=constants::DEGREES)
         .step_by(step)
-            .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64)
-            {
-                for (p, c) in pts.iter().zip(centers.iter()) {
-                    let t = Point3d::new(p.x, p.y * f64::cos(angle), p.y * f64::sin(angle));
-                    normal2points.push(Point3d::new(
-                            2.0 * t.x - c.x,
-                            2.0 * t.y - c.y,
-                            2.0 * t.z - c.z,
-                    ));
-                    points.push(t);
-                }
-            }
+        .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64)
+    {
+        for (p, c) in pts.iter().zip(centers.iter()) {
+            let t = Point3d::new(p.x, p.y * f64::cos(angle), p.y * f64::sin(angle));
+            normal2points.push(Point3d::new(
+                2.0 * t.x - c.x,
+                2.0 * t.y - c.y,
+                2.0 * t.z - c.z,
+            ));
+            points.push(t);
+        }
+    }
 
     (points, normal2points)
 }

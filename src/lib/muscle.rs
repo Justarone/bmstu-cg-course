@@ -23,11 +23,7 @@ pub struct MOParams {
 
 impl MOParams {
     pub fn new(pos: usize, rad: f64, gm: f64) -> Self {
-        Self {
-            pos,
-            rad,
-            gm,
-        }
+        Self { pos, rad, gm }
     }
 }
 
@@ -70,7 +66,11 @@ impl Muscle {
 
     pub fn get_node(&self, pos: usize) -> Result<(f64, f64), String> {
         if pos >= self.radiuses.len() {
-            return Err(format!("Bad pos!\npos: {};\nnumber of nodes: {}.", pos, self.radiuses.len()))
+            return Err(format!(
+                "Bad pos!\npos: {};\nnumber of nodes: {}.",
+                pos,
+                self.radiuses.len()
+            ));
         }
         Ok((self.radiuses[pos], self.grow_mults[pos]))
     }
@@ -80,7 +80,11 @@ impl Muscle {
         match mo {
             MuscleOperation::Del(pos) => {
                 if pos > self.radiuses.len() - 1 || self.radiuses.len() < 3 {
-                    return Err(format!("Can't delete!\npos: {};\nnumber of nodes: {}", pos, self.radiuses.len()))
+                    return Err(format!(
+                        "Can't delete!\npos: {};\nnumber of nodes: {}",
+                        pos,
+                        self.radiuses.len()
+                    ));
                 }
                 self.radiuses.remove(pos);
                 self.grow_mults.remove(pos);
@@ -93,7 +97,11 @@ impl Muscle {
             }
             MuscleOperation::Mod(MOParams { pos, rad, gm }) => {
                 if pos > self.radiuses.len() - 1 {
-                    return Err(format!("Can't modify!\npos: {};\nnumber of nodes: {}", pos, self.radiuses.len()))
+                    return Err(format!(
+                        "Can't modify!\npos: {};\nnumber of nodes: {}",
+                        pos,
+                        self.radiuses.len()
+                    ));
                 }
                 self.radiuses[pos] = rad;
                 self.grow_mults[pos] = gm;
@@ -101,7 +109,11 @@ impl Muscle {
             }
             MuscleOperation::Add(MOParams { pos, rad, gm }) => {
                 if pos > self.radiuses.len() {
-                    return Err(format!("Can't add!\npos: {};\nlen: {}", pos, self.radiuses.len()))
+                    return Err(format!(
+                        "Can't add!\npos: {};\nlen: {}",
+                        pos,
+                        self.radiuses.len()
+                    ));
                 }
                 self.radiuses.insert(pos, rad);
                 self.grow_mults.insert(pos, gm);
@@ -126,8 +138,8 @@ impl Muscle {
             let (mut new_points, mut new_norm2points) = rotate_intersections(
                 &[p1, p2],
                 &[
-                Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
-                Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64),
+                    Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
+                    Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64),
                 ], // center of (i + 1)-th sphere
                 constants::MUSCLE_STEP,
             );
@@ -147,10 +159,10 @@ impl Muscle {
         let index_arr = [0, self.radiuses.len() - 1];
         for (center, rad) in index_arr
             .iter()
-                .map(|&index| (self.dx * index as f64, self.radiuses[index]))
-                {
-                    add_uv_sphere(points, normal2points, center, rad);
-                }
+            .map(|&index| (self.dx * index as f64, self.radiuses[index]))
+        {
+            add_uv_sphere(points, normal2points, center, rad);
+        }
     }
 
     pub fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {

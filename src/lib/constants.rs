@@ -116,6 +116,8 @@ pub const MODP_BTN: usize = 3;
 pub const MODM_BTN: usize = 4;
 pub const NEXT_BTN: usize = 5;
 pub const PREV_BTN: usize = 6;
-pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = ["add_btn", "del_btn", "mod_btn", "modp_btn", "modm_btn", "next_btn", "prev_btn"];
+pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = [
+    "add_btn", "del_btn", "mod_btn", "modp_btn", "modm_btn", "next_btn", "prev_btn",
+];
 
 pub const DELTA_RAD: f64 = 1.0;

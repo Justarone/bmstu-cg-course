@@ -2,10 +2,10 @@ use super::prelude::*;
 
 #[allow(non_upper_case_globals)]
 static mut z_buffer: [[f64; constants::WIDTH]; constants::HEIGHT] =
-[[f64::MIN; constants::WIDTH]; constants::HEIGHT];
+    [[f64::MIN; constants::WIDTH]; constants::HEIGHT];
 #[allow(non_upper_case_globals)]
 static mut color_buffer: [[u32; constants::WIDTH]; constants::HEIGHT] =
-[[constants::DEFAULT_COLOR; constants::WIDTH]; constants::HEIGHT];
+    [[constants::DEFAULT_COLOR; constants::WIDTH]; constants::HEIGHT];
 
 pub unsafe fn clear_buffers() {
     for line in z_buffer.iter_mut() {
@@ -38,26 +38,26 @@ pub unsafe fn transform_and_add(
 
         for (change_index, (&new_point, &new_normal)) in (2..)
             .map(|elem| elem % 3)
-                .zip(points.iter().skip(2).zip(normals.iter().skip(2)))
-                {
-                    current_window[change_index] = transform_and_normalize(new_point, new_normal, matrix);
-                    if check_pos_all(current_window.iter().map(|elem| elem.0))
-                        && check_normals_all(current_window.iter().map(|elem| elem.1))
-                    {
-                        // no way to build slice from iterator :(
-                        let points = [
-                            current_window[0].0,
-                            current_window[1].0,
-                            current_window[2].0,
-                        ];
-                        let normals = [
-                            current_window[0].1,
-                            current_window[1].1,
-                            current_window[2].1,
-                        ];
-                        add_polygon(points, normals, &light_source, color);
-                    }
-                }
+            .zip(points.iter().skip(2).zip(normals.iter().skip(2)))
+        {
+            current_window[change_index] = transform_and_normalize(new_point, new_normal, matrix);
+            if check_pos_all(current_window.iter().map(|elem| elem.0))
+                && check_normals_all(current_window.iter().map(|elem| elem.1))
+            {
+                // no way to build slice from iterator :(
+                let points = [
+                    current_window[0].0,
+                    current_window[1].0,
+                    current_window[2].0,
+                ];
+                let normals = [
+                    current_window[0].1,
+                    current_window[1].1,
+                    current_window[2].1,
+                ];
+                add_polygon(points, normals, &light_source, color);
+            }
+        }
     }
 }
 
@@ -109,7 +109,8 @@ unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
             pair[0].y_start = 0;
         }
 
-        for y in (pair[0].y_start..=pair[0].y_end).filter(|&elem| elem < constants::HEIGHT as i16)
+        for y in (pair[0].y_start..=pair[0].y_end)
+            .filter(|&elem| elem < constants::HEIGHT as i16)
             .map(|y| y as usize)
         {
             let x_from = f64::round(pair[0].x_start) as usize;
@@ -174,10 +175,10 @@ unsafe fn find_brightnesses(normals: [Vec3d; 3], light_source: &Vec3d) -> [f64; 
     [
         constants::ZERO_BRIGHTNESS
             + constants::BRIGHTNESS_RANGE * (normals[0].scalar_mul(light_source)),
-            constants::ZERO_BRIGHTNESS
-                + constants::BRIGHTNESS_RANGE * (normals[1].scalar_mul(light_source)),
-                constants::ZERO_BRIGHTNESS
-                    + constants::BRIGHTNESS_RANGE * (normals[2].scalar_mul(light_source)),
+        constants::ZERO_BRIGHTNESS
+            + constants::BRIGHTNESS_RANGE * (normals[1].scalar_mul(light_source)),
+        constants::ZERO_BRIGHTNESS
+            + constants::BRIGHTNESS_RANGE * (normals[2].scalar_mul(light_source)),
     ]
 }
 
@@ -208,14 +209,14 @@ unsafe fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3
                 brightnesses[0],
                 brightnesses[2],
             ),
-            ];
+        ];
     };
 
     let midpoint2 = find_midpoint2(&int_points[0], &int_points[2], int_points[1].y);
     let midbrightness = brightnesses[0]
         + (brightnesses[2] - brightnesses[0])
-        * ((int_points[1].y - int_points[0].y) as f64
-            / (int_points[2].y - int_points[0].y) as f64);
+            * ((int_points[1].y - int_points[0].y) as f64
+                / (int_points[2].y - int_points[0].y) as f64);
 
     if midpoint2.x > int_points[1].x {
         [

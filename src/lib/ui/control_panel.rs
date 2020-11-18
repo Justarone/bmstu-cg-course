@@ -24,15 +24,15 @@ pub fn setup_control_panel(
 ) {
     for (btn_name, key) in constants::COMMANDS_BUTTONS
         .iter()
-        .zip(constants::CMDS_BTNS_KEY_MAP.iter())
-    {
-        let btn: gtk::Button = builder
-            .get_object(btn_name)
-            .expect(&format!("get {} object", btn_name));
-        btn.connect_clicked(clone!(controller, drawing_area, key => move |_| {
-            process_key(&controller, &drawing_area, key);
-        }));
-    }
+            .zip(constants::CMDS_BTNS_KEY_MAP.iter())
+            {
+                let btn: gtk::Button = builder
+                    .get_object(btn_name)
+                    .expect(&format!("get {} object", btn_name));
+                btn.connect_clicked(clone!(controller, drawing_area, key => move |_| {
+                    process_key(&controller, &drawing_area, key);
+                }));
+            }
     let mut inputs: Vec<gtk::Entry> = Vec::with_capacity(constants::INPUTS_AMOUNT);
     for inp_name in constants::INPUTS_NAMES.iter() {
         inputs.push(builder.get_object(inp_name).unwrap());
@@ -59,9 +59,9 @@ fn setup_add(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
             };
             {
                 let mut controller = controller.lock().unwrap();
-                if let Err(text) = 
+                if let Err(text) =
                     controller.restruct_muscle(MuscleOperation::Add(MOParams::new(pos, rad, gm))) {
-                    show_error(text.to_string());
+                        show_error(text.to_string());
                 }
                 controller.update_pixbuf();
             }
@@ -81,9 +81,9 @@ fn setup_mod(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
             };
             {
                 let mut controller = controller.lock().unwrap();
-                if let Err(text) = 
+                if let Err(text) =
                     controller.restruct_muscle(MuscleOperation::Mod(MOParams::new(pos, rad, gm))) {
-                    show_error(text.to_string());
+                        show_error(text.to_string());
                 }
                 controller.update_pixbuf();
             }
@@ -137,9 +137,9 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
                 rad += constants::DELTA_RAD;
                 inputs[constants::RAD_INPUT].get_buffer().set_text(&rad.to_string());
                 inputs[constants::GM_INPUT].get_buffer().set_text(&gm.to_string());
-                if let Err(text) = 
+                if let Err(text) =
                     controller.restruct_muscle(MuscleOperation::Mod(MOParams::new(pos, rad, gm))) {
-                    show_error(text.to_string());
+                        show_error(text.to_string());
                 }
                 controller.update_pixbuf();
             }
@@ -166,9 +166,9 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
                 rad -= constants::DELTA_RAD;
                 inputs[constants::RAD_INPUT].get_buffer().set_text(&rad.to_string());
                 inputs[constants::GM_INPUT].get_buffer().set_text(&gm.to_string());
-                if let Err(text) = 
+                if let Err(text) =
                     controller.restruct_muscle(MuscleOperation::Mod(MOParams::new(pos, rad, gm))) {
-                    show_error(text.to_string());
+                        show_error(text.to_string());
                 }
                 controller.update_pixbuf();
             }
@@ -181,11 +181,11 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
 fn setup_next_prev(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>) {
     rbtns[constants::NEXT_BTN].connect_clicked(
         clone!(inputs => move |_| {
-            let mut pos = 
+            let mut pos =
                 match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
-                Ok(val) => val,
-                Err(_) => 0,
-            };
+                    Ok(val) => val,
+                    Err(_) => 0,
+                };
             pos += 1;
             inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
         }),
@@ -193,11 +193,11 @@ fn setup_next_prev(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>) {
 
     rbtns[constants::PREV_BTN].connect_clicked(
         clone!(inputs => move |_| {
-            let mut pos = 
+            let mut pos =
                 match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
-                Ok(val) => val,
-                Err(_) => 0,
-            };
+                    Ok(val) => val,
+                    Err(_) => 0,
+                };
             pos -= 1;
             inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
         }),

@@ -9,11 +9,11 @@ mod ui;
 mod utils;
 
 pub mod prelude {
-    pub use super::cg::{clear_buffers, transform_and_add, flush};
+    pub use super::cg::{clear_buffers, flush, transform_and_add};
     pub use super::constants;
     pub use super::constants::keys;
     pub use super::controller::Controller;
-    pub use super::muscle::{ Muscle, MOParams, MuscleOperation };
+    pub use super::muscle::{MOParams, Muscle, MuscleOperation};
     pub use super::primitives::{
         Axis, CenterTransformator, IntYPoint3d, Matrix4, Point3d, Section, Transformator, Vec2d,
         Vec3d,
