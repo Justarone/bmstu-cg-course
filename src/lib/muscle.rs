@@ -127,8 +127,34 @@ impl Muscle {
         }
     }
 
-    fn normal_ep(&self, i: usize) -> Point3d {
+    #[allow(dead_code)]
+    fn normal_ep_parall(&self, i: usize) -> Point3d {
         Point3d::new(self.dx * i as f64, 2.0 * self.radiuses[i], 0_f64)
+    }
+
+    fn get_angle(&self, i: usize) -> f64 {
+        let last = self.radiuses.len() - 1;
+        match i {
+            0 => f64::atan((self.radiuses[1] - self.radiuses[0]) / self.dx) + std::f64::consts::PI / 2f64,
+            val if val == last => {
+                f64::atan((self.radiuses[last] - self.radiuses[last - 1]) / self.dx)
+                    + std::f64::consts::PI / 2f64
+            }
+            val => {
+                let a1 = (self.radiuses[val] - self.radiuses[val - 1]) / self.dx;
+                let a2 = (self.radiuses[val + 1] - self.radiuses[val]) / self.dx;
+                (f64::atan(a1) + f64::atan(a2)) / 2f64 + std::f64::consts::PI / 2f64
+            }
+        }
+    }
+
+    fn normal_ep(&self, i: usize) -> Point3d {
+        let angle = self.get_angle(i);
+        Point3d::new(
+            self.dx * i as f64 + f64::cos(angle),
+            self.radiuses[i] + f64::sin(angle),
+            0_f64,
+        )
     }
 
     fn fill_pn_connectors(

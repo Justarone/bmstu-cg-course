@@ -8,7 +8,7 @@ pub const HAS_ALPHA: bool = true;
 pub const MIN_PART: f64 = 0.4;
 pub const MAX_PART: f64 = 2.5;
 
-pub const NEGATIVE_Z_PROJECTION: f64 = -0.8;
+pub const NEGATIVE_Z_PROJECTION: f64 = 0f64;
 
 pub const DEGREES: usize = 360;
 
