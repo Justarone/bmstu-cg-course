@@ -88,8 +88,8 @@ impl Carcass {
                 Point3d::new(len, self.thickness, 0_f64),
             ],
             &[
-                Point3d::new(0_f64, 0_f64, 0_f64),
-                Point3d::new(len, 0_f64, 0_f64),
+                Point3d::new(0_f64, 2_f64 * self.thickness, 0_f64),
+                Point3d::new(len, 2_f64 * self.thickness, 0_f64),
             ],
             constants::CARCASS_STEP,
         );

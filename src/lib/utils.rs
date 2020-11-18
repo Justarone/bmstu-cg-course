@@ -81,9 +81,12 @@ pub fn add_uv_sphere(
     }
 
     for pts in solutions.windows(2) {
-        let cpoint = Point3d::new(center, 0_f64, 0_f64);
+        let end_points = [
+            Point3d::new(-center + 2.0 * pts[0].x, 2.0 * pts[0].y, 2.0 * pts[0].z),
+            Point3d::new(-center + 2.0 * pts[1].x, 2.0 * pts[1].y, 2.0 * pts[1].z),
+        ];
         let (mut new_points, mut new_norm2points) =
-            rotate_intersections(pts, &[cpoint, cpoint], constants::SPHERE_STEP);
+            rotate_intersections(pts, &end_points, constants::SPHERE_STEP);
         cycle_extend(&mut new_points, 2);
         cycle_extend(&mut new_norm2points, 2);
 
@@ -94,7 +97,7 @@ pub fn add_uv_sphere(
 
 pub fn rotate_intersections(
     pts: &[Point3d],
-    centers: &[Point3d],
+    vecs_eps: &[Point3d],
     step: usize,
 ) -> (Vec<Point3d>, Vec<Point3d>) {
     let mut points = Vec::with_capacity(constants::DEGREES / step * 2);
@@ -104,13 +107,9 @@ pub fn rotate_intersections(
         .step_by(step)
         .map(|angle| angle as f64 * std::f64::consts::PI / 180_f64)
     {
-        for (p, c) in pts.iter().zip(centers.iter()) {
+        for (p, ep) in pts.iter().zip(vecs_eps.iter()) {
             let t = Point3d::new(p.x, p.y * f64::cos(angle), p.y * f64::sin(angle));
-            normal2points.push(Point3d::new(
-                2.0 * t.x - c.x,
-                2.0 * t.y - c.y,
-                2.0 * t.z - c.z,
-            ));
+            normal2points.push(Point3d::new(ep.x, ep.y * f64::cos(angle), ep.y * f64::sin(angle)));
             points.push(t);
         }
     }

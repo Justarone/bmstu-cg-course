@@ -127,6 +127,10 @@ impl Muscle {
         }
     }
 
+    fn normal_ep(&self, i: usize) -> Point3d {
+        Point3d::new(self.dx * i as f64, 2.0 * self.radiuses[i], 0_f64)
+    }
+
     fn fill_pn_connectors(
         &self,
         points: &mut Vec<Vec<Point3d>>,
@@ -137,10 +141,7 @@ impl Muscle {
 
             let (mut new_points, mut new_norm2points) = rotate_intersections(
                 &[p1, p2],
-                &[
-                    Point3d::new(self.dx * i as f64, 0_f64, 0_f64), // center of i-th sphere
-                    Point3d::new(self.dx * (i + 1) as f64, 0_f64, 0_f64),
-                ], // center of (i + 1)-th sphere
+                &[self.normal_ep(i), self.normal_ep(i + 1)],
                 constants::MUSCLE_STEP,
             );
             cycle_extend(&mut new_points, 2);
@@ -254,7 +255,6 @@ impl Muscle {
         if i1 > i2 {
             std::mem::swap(&mut i1, &mut i2);
         }
-
         (
             Point3d::new(self.dx * i1 as f64, self.radiuses[i1], 0_f64),
             Point3d::new(self.dx * i2 as f64, self.radiuses[i2], 0_f64),
