@@ -24,15 +24,15 @@ pub fn setup_control_panel(
 ) {
     for (btn_name, key) in constants::COMMANDS_BUTTONS
         .iter()
-            .zip(constants::CMDS_BTNS_KEY_MAP.iter())
-            {
-                let btn: gtk::Button = builder
-                    .get_object(btn_name)
-                    .expect(&format!("get {} object", btn_name));
-                btn.connect_clicked(clone!(controller, drawing_area, key => move |_| {
-                    process_key(&controller, &drawing_area, key);
-                }));
-            }
+        .zip(constants::CMDS_BTNS_KEY_MAP.iter())
+    {
+        let btn: gtk::Button = builder
+            .get_object(btn_name)
+            .expect(&format!("get {} object", btn_name));
+        btn.connect_clicked(clone!(controller, drawing_area, key => move |_| {
+            process_key(&controller, &drawing_area, key);
+        }));
+    }
     let mut inputs: Vec<gtk::Entry> = Vec::with_capacity(constants::INPUTS_AMOUNT);
     for inp_name in constants::INPUTS_NAMES.iter() {
         inputs.push(builder.get_object(inp_name).unwrap());
@@ -49,8 +49,12 @@ pub fn setup_control_panel(
     setup_next_prev(&rbtns, &inputs);
 }
 
-fn setup_add(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Arc<Mutex<Controller>>,
-    drawing_area: &gtk::DrawingArea) {
+fn setup_add(
+    rbtns: &Vec<gtk::Button>,
+    inputs: &Vec<gtk::Entry>,
+    controller: &Arc<Mutex<Controller>>,
+    drawing_area: &gtk::DrawingArea,
+) {
     rbtns[constants::ADD_BTN].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let (pos, rad, gm) = match parse_all(&inputs) {
@@ -71,8 +75,12 @@ fn setup_add(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
     );
 }
 
-fn setup_mod(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Arc<Mutex<Controller>>,
-    drawing_area: &gtk::DrawingArea) {
+fn setup_mod(
+    rbtns: &Vec<gtk::Button>,
+    inputs: &Vec<gtk::Entry>,
+    controller: &Arc<Mutex<Controller>>,
+    drawing_area: &gtk::DrawingArea,
+) {
     rbtns[constants::MOD_BTN].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let (pos, rad, gm) = match parse_all(&inputs) {
@@ -93,9 +101,12 @@ fn setup_mod(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
     );
 }
 
-
-fn setup_del(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Arc<Mutex<Controller>>,
-    drawing_area: &gtk::DrawingArea) {
+fn setup_del(
+    rbtns: &Vec<gtk::Button>,
+    inputs: &Vec<gtk::Entry>,
+    controller: &Arc<Mutex<Controller>>,
+    drawing_area: &gtk::DrawingArea,
+) {
     rbtns[constants::DEL_BTN].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let pos = match parse_or_show_err(inputs[constants::POS_INPUT].get_buffer().get_text()) {
@@ -117,9 +128,14 @@ fn setup_del(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
     );
 }
 
-fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Arc<Mutex<Controller>>,
-    drawing_area: &gtk::DrawingArea) {
-    rbtns[constants::MODP_BTN].connect_clicked(
+fn setup_rpm(
+    rbtns: &Vec<gtk::Button>,
+    inputs: &Vec<gtk::Entry>,
+    controller: &Arc<Mutex<Controller>>,
+    drawing_area: &gtk::DrawingArea,
+) {
+    for (&i1, &i2) in [constants::MODP_BTN, constants::MODPG_BTN].iter().zip([constants::MODM_BTN, constants::MODMG_BTN].iter()) {
+        rbtns[i1].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let pos = match parse_or_show_err(inputs[constants::POS_INPUT].get_buffer().get_text()) {
                 Ok(val) => val,
@@ -127,14 +143,18 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
             };
             {
                 let mut controller = controller.lock().unwrap();
-                let (mut rad, gm) = match controller.get_node(pos) {
+                let (mut rad, mut gm) = match controller.get_node(pos) {
                     Ok(val) => val,
                     Err(txt) => {
                         show_error(txt);
                         return;
                     },
                 };
-                rad += constants::DELTA_RAD;
+                match i1 {
+                    constants::MODP_BTN => rad += constants::DELTA_VAL,
+                    constants::MODPG_BTN => gm += constants::DELTA_VAL,
+                    _ => unreachable!("only 2 variants"),
+                }
                 inputs[constants::RAD_INPUT].get_buffer().set_text(&rad.to_string());
                 inputs[constants::GM_INPUT].get_buffer().set_text(&gm.to_string());
                 if let Err(text) =
@@ -148,7 +168,7 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
         }),
     );
 
-    rbtns[constants::MODM_BTN].connect_clicked(
+        rbtns[i2].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let pos = match parse_or_show_err(inputs[constants::POS_INPUT].get_buffer().get_text()) {
                 Ok(val) => val,
@@ -156,14 +176,18 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
             };
             {
                 let mut controller = controller.lock().unwrap();
-                let (mut rad, gm) = match controller.get_node(pos) {
+                let (mut rad, mut gm) = match controller.get_node(pos) {
                     Ok(val) => val,
                     Err(txt) => {
                         show_error(txt);
                         return;
                     },
                 };
-                rad -= constants::DELTA_RAD;
+                match i2 {
+                    constants::MODM_BTN => rad -= constants::DELTA_VAL,
+                    constants::MODMG_BTN => gm -= constants::DELTA_VAL,
+                    _ => unreachable!("only 2 variants"),
+                }
                 inputs[constants::RAD_INPUT].get_buffer().set_text(&rad.to_string());
                 inputs[constants::GM_INPUT].get_buffer().set_text(&gm.to_string());
                 if let Err(text) =
@@ -176,32 +200,29 @@ fn setup_rpm(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>, controller: &Ar
             drawing_area.queue_draw();
         }),
     );
+    }
 }
 
 fn setup_next_prev(rbtns: &Vec<gtk::Button>, inputs: &Vec<gtk::Entry>) {
-    rbtns[constants::NEXT_BTN].connect_clicked(
-        clone!(inputs => move |_| {
-            let mut pos =
-                match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
-                    Ok(val) => val,
-                    Err(_) => 0,
-                };
-            pos += 1;
-            inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
-        }),
-    );
+    rbtns[constants::NEXT_BTN].connect_clicked(clone!(inputs => move |_| {
+        let mut pos =
+            match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
+                Ok(val) => val,
+                Err(_) => 0,
+            };
+        pos += 1;
+        inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
+    }));
 
-    rbtns[constants::PREV_BTN].connect_clicked(
-        clone!(inputs => move |_| {
-            let mut pos =
-                match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
-                    Ok(val) => val,
-                    Err(_) => 0,
-                };
-            pos -= 1;
-            inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
-        }),
-    );
+    rbtns[constants::PREV_BTN].connect_clicked(clone!(inputs => move |_| {
+        let mut pos =
+            match parse_or_show_err::<usize>(inputs[constants::POS_INPUT].get_buffer().get_text()) {
+                Ok(val) => val,
+                Err(_) => 0,
+            };
+        pos -= 1;
+        inputs[constants::POS_INPUT].get_buffer().set_text(&pos.to_string());
+    }));
 }
 
 fn parse_all(inputs: &Vec<gtk::Entry>) -> Result<(usize, f64, f64), ()> {
