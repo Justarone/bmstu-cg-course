@@ -1,4 +1,4 @@
-use log::debug;
+use log::{ debug, info };
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use termion::{color, style};
@@ -17,11 +17,14 @@ pub struct Controller {
     height: usize,
     width: usize,
     pb: Pixbuf,
+
     muscle: Arc<Mutex<Muscle>>,
     carcass: Arc<Mutex<Carcass>>,
-    matrix: Matrix4,
     cached_muscle: Option<(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>)>,
     cached_carcass: Option<(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>)>,
+
+    matrix: Matrix4,
+    light_source: Point3d,
 }
 
 impl Controller {
@@ -39,6 +42,7 @@ impl Controller {
             matrix,
             cached_muscle: None,
             cached_carcass: None,
+            light_source: constants::LIGHT_SOURCE,
         }
     }
 
@@ -64,6 +68,10 @@ impl Controller {
         }
     }
 
+    pub fn move_light_source(&mut self, p: Point3d) {
+        self.light_source = p;
+    }
+
     pub fn update_pixbuf(&mut self) {
         if let None = self.cached_muscle {
             let muscle = self.muscle.lock().unwrap();
@@ -87,7 +95,7 @@ impl Controller {
             transform_and_add(
                 self.cached_muscle.as_ref().unwrap(),
                 &self.matrix,
-                constants::LIGHT_SOURCE_DIRECTION,
+                self.light_source,
                 constants::MUSCLE_COLOR,
             );
             debug!(
@@ -98,7 +106,7 @@ impl Controller {
             transform_and_add(
                 self.cached_carcass.as_ref().unwrap(),
                 &self.matrix,
-                constants::LIGHT_SOURCE_DIRECTION,
+                self.light_source,
                 constants::CARCASS_COLOR,
             );
             debug!(
@@ -114,6 +122,10 @@ impl Controller {
                 color::Fg(color::Yellow)
             );
         }
+
+        let mut zp = Point3d::new(0.0, 0.0, 0.0);
+        self.matrix.apply_to_point(&mut zp);
+        info!("POSITION: {}", zp);
     }
 
     fn update_matrix(&mut self, operation: Operation, val: f64) {

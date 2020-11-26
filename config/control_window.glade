@@ -5,7 +5,7 @@
   <object class="GtkApplicationWindow" id="window">
     <property name="can-focus">False</property>
     <property name="default-width">490</property>
-    <property name="default-height">490</property>
+    <property name="default-height">700</property>
     <property name="show-menubar">False</property>
     <child>
       <object class="GtkFixed">
@@ -567,6 +567,120 @@
           <packing>
             <property name="x">185</property>
             <property name="y">421</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width-request">140</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Light source position</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">162</property>
+            <property name="y">452</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="x_input">
+            <property name="width-request">168</property>
+            <property name="height-request">28</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">33</property>
+            <property name="y">514</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="y_input">
+            <property name="width-request">22</property>
+            <property name="height-request">28</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">33</property>
+            <property name="y">551</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkEntry" id="z_input">
+            <property name="width-request">168</property>
+            <property name="height-request">30</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+          </object>
+          <packing>
+            <property name="x">32</property>
+            <property name="y">588</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width-request">32</property>
+            <property name="height-request">32</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Y</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">547</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width-request">24</property>
+            <property name="height-request">28</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Z</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">6</property>
+            <property name="y">588</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="width-request">26</property>
+            <property name="height-request">22</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">X</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">7</property>
+            <property name="y">516</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="move_ls">
+            <property name="label" translatable="yes">Set</property>
+            <property name="width-request">68</property>
+            <property name="height-request">47</property>
+            <property name="visible">True</property>
+            <property name="can-focus">True</property>
+            <property name="receives-default">True</property>
+          </object>
+          <packing>
+            <property name="x">297</property>
+            <property name="y">545</property>
           </packing>
         </child>
       </object>

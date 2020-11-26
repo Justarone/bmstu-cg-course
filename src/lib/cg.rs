@@ -1,20 +1,18 @@
 use super::prelude::*;
 
-#[allow(non_upper_case_globals)]
-static mut z_buffer: [[f64; constants::WIDTH]; constants::HEIGHT] =
+static mut Z_BUFFER: [[f64; constants::WIDTH]; constants::HEIGHT] =
     [[f64::MIN; constants::WIDTH]; constants::HEIGHT];
-#[allow(non_upper_case_globals)]
-static mut color_buffer: [[u32; constants::WIDTH]; constants::HEIGHT] =
+static mut COLOR_BUFFER: [[u32; constants::WIDTH]; constants::HEIGHT] =
     [[constants::DEFAULT_COLOR; constants::WIDTH]; constants::HEIGHT];
 
 pub unsafe fn clear_buffers() {
-    for line in z_buffer.iter_mut() {
+    for line in Z_BUFFER.iter_mut() {
         for pixel in line.iter_mut() {
             *pixel = constants::MIN_Z;
         }
     }
 
-    for line in color_buffer.iter_mut() {
+    for line in COLOR_BUFFER.iter_mut() {
         for color in line.iter_mut() {
             *color = constants::DEFAULT_COLOR;
         }
@@ -24,7 +22,7 @@ pub unsafe fn clear_buffers() {
 pub unsafe fn transform_and_add(
     points_and_normals: &(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>),
     matrix: &Matrix4,
-    light_source: Vec3d,
+    light_source: Point3d,
     color: u32,
 ) {
     let (points_groups, normals_groups) = points_and_normals;
@@ -62,7 +60,7 @@ pub unsafe fn transform_and_add(
 }
 
 pub unsafe fn flush(pb: Pixbuf) {
-    for (i, line) in color_buffer.iter().enumerate() {
+    for (i, line) in COLOR_BUFFER.iter().enumerate() {
         for (j, pixel) in line.iter().enumerate() {
             pb.put_pixel(
                 j as u32,
@@ -79,7 +77,7 @@ pub unsafe fn flush(pb: Pixbuf) {
 unsafe fn add_polygon(
     points: [Point3d; 3],
     mut normals: [Vec3d; 3],
-    light_source: &Vec3d,
+    light_source: &Point3d,
     color: u32,
 ) {
     let mut int_points = [
@@ -88,7 +86,7 @@ unsafe fn add_polygon(
         IntYPoint3d::from(points[2]),
     ];
     sort_by_y(&mut int_points, &mut normals);
-    let brightnesses = find_brightnesses(normals, light_source);
+    let brightnesses = find_brightnesses(points, normals, light_source);
     let sections = divide_on_sections(int_points, brightnesses);
     process_sections(sections, color);
 }
@@ -123,8 +121,8 @@ unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
             let z_diff = (pair[1].z_start - z) / diff_x;
 
             for x in (x_from..=x_to).filter(|&x| x < constants::WIDTH) {
-                if z > z_buffer[y][x] {
-                    z_buffer[y][x] = z;
+                if z > Z_BUFFER[y][x] {
+                    Z_BUFFER[y][x] = z;
                     put_color(x, y, color, br);
                 }
 
@@ -148,17 +146,16 @@ unsafe fn put_color(x: usize, y: usize, color: u32, br: f64) {
         (color >> 8 & 0xFF) as f64 * br,
         (color & 0xFF) as u32,
     );
-    let (r, g, b, a) = (
+    let (r, g, b) = (
         (f64::round(r) as u32) << 24,
         (f64::round(g) as u32) << 16,
         (f64::round(b) as u32) << 8,
-        a,
     );
     let color = r + g + b + a;
-    color_buffer[y][x] = color;
+    COLOR_BUFFER[y][x] = color;
 }
 
-unsafe fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3]) {
+fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3]) {
     for (&i, &j) in [0, 0, 1].iter().zip([2, 1, 2].iter()) {
         let condition = {
             let (a, b) = (&int_points[i], &int_points[j]);
@@ -171,18 +168,25 @@ unsafe fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3])
     }
 }
 
-unsafe fn find_brightnesses(normals: [Vec3d; 3], light_source: &Vec3d) -> [f64; 3] {
+fn find_brightnesses(points: [Point3d; 3], normals: [Vec3d; 3], light_source: &Point3d) -> [f64; 3] {
+    let mut lsvs = Vec::with_capacity(3);
+    for i in 0..3 {
+        let mut lsv = Vec3d::from_pts(&points[i], light_source);
+        lsv.normalize();
+        lsvs.push(lsv);
+    }
+
     [
         constants::ZERO_BRIGHTNESS
-            + constants::BRIGHTNESS_RANGE * (normals[0].scalar_mul(light_source)),
+            + constants::BRIGHTNESS_RANGE * (normals[0].scalar_mul(&lsvs[0])),
         constants::ZERO_BRIGHTNESS
-            + constants::BRIGHTNESS_RANGE * (normals[1].scalar_mul(light_source)),
+            + constants::BRIGHTNESS_RANGE * (normals[1].scalar_mul(&lsvs[1])),
         constants::ZERO_BRIGHTNESS
-            + constants::BRIGHTNESS_RANGE * (normals[2].scalar_mul(light_source)),
+            + constants::BRIGHTNESS_RANGE * (normals[2].scalar_mul(&lsvs[2])),
     ]
 }
 
-unsafe fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3]) -> [Section; 4] {
+fn divide_on_sections(int_points: [IntYPoint3d; 3], brightnesses: [f64; 3]) -> [Section; 4] {
     if int_points[0].y == int_points[2].y {
         return [
             Section::new(

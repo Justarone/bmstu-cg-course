@@ -47,6 +47,7 @@ pub fn setup_control_panel(
     setup_del(&rbtns, &inputs, &controller, &drawing_area);
     setup_rpm(&rbtns, &inputs, &controller, &drawing_area);
     setup_next_prev(&rbtns, &inputs);
+    setup_light_button(&rbtns, &inputs, &controller, &drawing_area);
 }
 
 fn setup_add(
@@ -134,7 +135,10 @@ fn setup_rpm(
     controller: &Arc<Mutex<Controller>>,
     drawing_area: &gtk::DrawingArea,
 ) {
-    for (&i1, &i2) in [constants::MODP_BTN, constants::MODPG_BTN].iter().zip([constants::MODM_BTN, constants::MODMG_BTN].iter()) {
+    for (&i1, &i2) in [constants::MODP_BTN, constants::MODPG_BTN]
+        .iter()
+        .zip([constants::MODM_BTN, constants::MODMG_BTN].iter())
+    {
         rbtns[i1].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
             let pos = match parse_or_show_err(inputs[constants::POS_INPUT].get_buffer().get_text()) {
@@ -166,7 +170,7 @@ fn setup_rpm(
 
             drawing_area.queue_draw();
         }),
-    );
+        );
 
         rbtns[i2].connect_clicked(
         clone!(inputs, controller, drawing_area => move |_| {
@@ -242,6 +246,13 @@ fn parse_or_show_err<T: std::str::FromStr>(text: String) -> Result<T, ()> {
     }
 }
 
+fn parse_light_pos(inputs: &Vec<gtk::Entry>) -> Result<Point3d, ()> {
+    let x = parse_or_show_err(inputs[constants::X_INPUT].get_buffer().get_text())?;
+    let y = parse_or_show_err(inputs[constants::Y_INPUT].get_buffer().get_text())?;
+    let z = parse_or_show_err(inputs[constants::Z_INPUT].get_buffer().get_text())?;
+    Ok(Point3d::new(x, y, z))
+}
+
 fn show_error(text: String) {
     let dialog = gtk::MessageDialog::new(
         None::<&gtk::Window>,
@@ -252,4 +263,27 @@ fn show_error(text: String) {
     );
     dialog.set_title("Error");
     dialog.run();
+}
+
+fn setup_light_button(
+    rbtns: &Vec<gtk::Button>,
+    inputs: &Vec<gtk::Entry>,
+    controller: &Arc<Mutex<Controller>>,
+    drawing_area: &gtk::DrawingArea,
+) {
+    rbtns[constants::MOVE_LS].connect_clicked(
+    clone!(inputs, controller, drawing_area => move |_| {
+        let p = match parse_light_pos(&inputs) {
+            Ok(val) => val,
+            Err(_) => return,
+        };
+        {
+            let mut controller = controller.lock().unwrap();
+            controller.move_light_source(p);
+            controller.update_pixbuf();
+        }
+
+        drawing_area.queue_draw();
+    }),
+    );
 }

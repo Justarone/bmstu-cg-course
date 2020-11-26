@@ -1,4 +1,4 @@
-use super::prelude::Vec3d;
+use super::prelude::Point3d;
 
 pub const WIDTH: usize = 800;
 pub const HEIGHT: usize = 600;
@@ -35,10 +35,10 @@ pub const BRIGHTNESS_RANGE: f64 = 0.4;
 pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "main.yaml"];
 
 // this light vector must be normalized and it must direct to light source
-pub const LIGHT_SOURCE_DIRECTION: Vec3d = Vec3d {
-    x: 0.57735,
-    y: -0.57735,
-    z: -0.57735,
+pub const LIGHT_SOURCE: Point3d = Point3d {
+    x: 10000.0,
+    y: -10000.0,
+    z: -10000.0,
 };
 
 pub mod keys {
@@ -102,13 +102,16 @@ pub const CMDS_BTNS_KEY_MAP: [u16; COMMANDS_BUTTONS_AMOUNT] = [
     keys::X,
 ];
 
-pub const INPUTS_AMOUNT: usize = 3;
+pub const INPUTS_AMOUNT: usize = 6;
 pub const POS_INPUT: usize = 0;
 pub const RAD_INPUT: usize = 1;
 pub const GM_INPUT: usize = 2;
-pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = ["pos_input", "rad_input", "gm_input"];
+pub const X_INPUT: usize = 3;
+pub const Y_INPUT: usize = 4;
+pub const Z_INPUT: usize = 5;
+pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = ["pos_input", "rad_input", "gm_input", "x_input", "y_input", "z_input"];
 
-pub const RBTNS_AMOUNT: usize = 9;
+pub const RBTNS_AMOUNT: usize = 10;
 pub const ADD_BTN: usize = 0;
 pub const DEL_BTN: usize = 1;
 pub const MOD_BTN: usize = 2;
@@ -118,8 +121,9 @@ pub const MODP_BTN: usize = 5;
 pub const MODM_BTN: usize = 6;
 pub const MODPG_BTN: usize = 7;
 pub const MODMG_BTN: usize = 8;
+pub const MOVE_LS: usize = 9;
 pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = [
-    "add_btn", "del_btn", "mod_btn", "next_btn", "prev_btn", "modp_btn", "modm_btn", "modpg_btn", "modmg_btn", 
+    "add_btn", "del_btn", "mod_btn", "next_btn", "prev_btn", "modp_btn", "modm_btn", "modpg_btn", "modmg_btn", "move_ls"
 ];
 
 pub const DELTA_VAL: f64 = 1.0;

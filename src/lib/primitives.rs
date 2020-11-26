@@ -1,10 +1,17 @@
 use std::ops::MulAssign;
+use std::fmt;
 
 #[derive(Clone, Copy, Debug)]
 pub struct Point3d {
     pub x: f64,
     pub y: f64,
     pub z: f64,
+}
+
+impl fmt::Display for Point3d {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
+    }
 }
 
 impl Point3d {
