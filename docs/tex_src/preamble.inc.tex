@@ -50,15 +50,22 @@
 \usetikzlibrary{datavisualization}
 \usetikzlibrary{datavisualization.formats.functions}
 \usepackage{graphicx}
+\newcommand{\imgw}[3] {
+    \begin{figure}[!ht]
+        \center{\includegraphics[width=#1]{assets/img/#2}}
+        \caption{#3}
+        \label{img:#2}
+    \end{figure}
+}
 \newcommand{\img}[3] {
-    \begin{figure}[h]
+    \begin{figure}[!ht]
         \center{\includegraphics[height=#1]{assets/img/#2}}
         \caption{#3}
         \label{img:#2}
     \end{figure}
 }
 \newcommand{\boximg}[3] {
-    \begin{figure}[h]
+    \begin{figure}[!ht]
         \center{\fbox{\includegraphics[height=#1]{assets/img/#2}}}
         \caption{#3}
         \label{img:#2}
