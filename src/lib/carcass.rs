@@ -16,8 +16,26 @@ impl Carcass {
     }
 
     pub fn check_diff(&self, diff: f64) -> bool {
-        self.cur_len + diff < self.data[0][1] + self.data[1][0]
-            && self.cur_len + diff > f64::abs(self.data[0][1] - self.data[1][0])
+        self.cur_len + diff < self.data[0][1] + self.data[1][0] // max
+            && self.cur_len + diff >
+            f64::sqrt(f64::abs(f64::powi(self.data[0][1], 2) - f64::powi(self.data[1][0], 2))) // min
+    }
+
+    #[allow(dead_code)]
+    pub fn bounder(&self) -> Box<dyn Fn(f64) -> f64>
+    {
+        let a1 = -angle_from_triangle(self.data[1][0], self.data[0][1], self.cur_len);
+        let median = self.data[0][1] * f64::cos(a1);
+        let a2 = angle_from_triangle(self.data[0][1], self.data[1][0], self.cur_len);
+        let b = -self.cur_len * a2;
+        let thickness = self.thickness;
+        Box::new(move |x| {
+            if x <= median {
+                -(a1 * x - thickness / f64::cos(std::f64::consts::PI + f64::atan(a1)))
+            } else {
+                -(a2 * x + b - thickness / f64::cos(std::f64::consts::PI - f64::atan(a2)))
+            }
+        })
     }
 
     pub fn deform(&mut self, diff: f64) {
@@ -84,12 +102,12 @@ impl Carcass {
     ) {
         let (mut tube_points, mut tube_normals) = rotate_intersections(
             &[
-                Point3d::new(0_f64, self.thickness, 0_f64),
-                Point3d::new(len, self.thickness, 0_f64),
+            Point3d::new(0_f64, self.thickness, 0_f64),
+            Point3d::new(len, self.thickness, 0_f64),
             ],
             &[
-                Point3d::new(0_f64, 2_f64 * self.thickness, 0_f64),
-                Point3d::new(len, 2_f64 * self.thickness, 0_f64),
+            Point3d::new(0_f64, 2_f64 * self.thickness, 0_f64),
+            Point3d::new(len, 2_f64 * self.thickness, 0_f64),
             ],
             constants::CARCASS_STEP,
         );

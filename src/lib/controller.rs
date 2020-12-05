@@ -1,4 +1,4 @@
-use log::{ debug, info };
+use log::{debug, info};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use termion::{color, style};
@@ -48,8 +48,9 @@ impl Controller {
 
     pub fn restruct_muscle(&mut self, mo: MuscleOperation) -> Result<(), String> {
         let mut muscle = self.muscle.lock().unwrap();
+        let bounder = self.carcass.lock().unwrap().bounder();
         muscle.restruct(mo)?;
-        self.cached_muscle = Some(muscle.get_points_and_normals());
+        self.cached_muscle = Some(muscle.bget_points_and_normals(bounder));
         Ok(())
     }
 
@@ -58,12 +59,13 @@ impl Controller {
     }
 
     fn deform(&mut self, diff: f64) {
-        let mut muscle = self.muscle.lock().unwrap();
         let mut carcass = self.carcass.lock().unwrap();
         if carcass.check_diff(diff) {
+            let mut muscle = self.muscle.lock().unwrap();
             carcass.deform(diff);
+            let bounder = carcass.bounder();
             muscle.deform(diff);
-            self.cached_muscle = Some(muscle.get_points_and_normals());
+            self.cached_muscle = Some(muscle.bget_points_and_normals(bounder));
             self.cached_carcass = Some(carcass.get_points_and_normals());
         }
     }
@@ -75,7 +77,8 @@ impl Controller {
     pub fn update_pixbuf(&mut self) {
         if let None = self.cached_muscle {
             let muscle = self.muscle.lock().unwrap();
-            self.cached_muscle = Some(muscle.get_points_and_normals());
+            let bounder = self.carcass.lock().unwrap().bounder();
+            self.cached_muscle = Some(muscle.bget_points_and_normals(bounder));
         }
 
         if let None = self.cached_carcass {

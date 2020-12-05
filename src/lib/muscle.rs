@@ -135,7 +135,10 @@ impl Muscle {
     fn get_angle(&self, i: usize) -> f64 {
         let last = self.radiuses.len() - 1;
         match i {
-            0 => f64::atan((self.radiuses[1] - self.radiuses[0]) / self.dx) + std::f64::consts::PI / 2f64,
+            0 => {
+                f64::atan((self.radiuses[1] - self.radiuses[0]) / self.dx)
+                    + std::f64::consts::PI / 2f64
+            }
             val if val == last => {
                 f64::atan((self.radiuses[last] - self.radiuses[last - 1]) / self.dx)
                     + std::f64::consts::PI / 2f64
@@ -190,6 +193,44 @@ impl Muscle {
         {
             add_uv_sphere(points, normal2points, center, rad);
         }
+    }
+
+    fn apply_bounds(
+        &self,
+        (mut points, mut normals): (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>),
+        bounder: Box<dyn Fn(f64) -> f64>,
+    ) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
+        for i in 1..(self.radiuses.len() - 1) {
+            let cv = bounder(self.dx * i as f64) - self.radiuses[i];
+            if cv < 0_f64 {
+                for (p, n) in points[i - 1]
+                    .iter_mut()
+                    .skip(1)
+                    .step_by(2)
+                    .zip(normals[i - 1].iter_mut().skip(1).step_by(2))
+                {
+                    p.y += cv;
+                    n.y += cv;
+                }
+                for (p, n) in points[i]
+                    .iter_mut()
+                    .step_by(2)
+                    .zip(normals[i].iter_mut().step_by(2))
+                {
+                    p.y += cv;
+                    n.y += cv;
+                }
+            }
+        }
+        (points, normals)
+    }
+
+    #[allow(dead_code)]
+    pub fn bget_points_and_normals(
+        &self,
+        bounder: Box<dyn Fn(f64) -> f64>,
+    ) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
+        self.apply_bounds(self.get_points_and_normals(), bounder)
     }
 
     pub fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
