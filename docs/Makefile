@@ -9,8 +9,7 @@ TZ:
 RPZ:
 	soffice --headless --convert-to pdf word_src/RPZ_title.doc
 	cd tex_src/ && make -f Makefile_tex
-	cp tex_src/report.pdf .
-	pdfunite RPZ_title.pdf report.pdf RPZ.pdf
+	pdfunite RPZ_title.pdf tex_src/report.pdf RPZ.pdf
 	rm RPZ_title.pdf
 	mv RPZ.pdf pdfs
 
