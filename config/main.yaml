@@ -5,5 +5,5 @@ muscle_config:
   len: 250.0
 
 carcass_config:
-  data: [[30.0, 220.0], [80.0, 120.0]]
+  data: [[30.0, 230.0], [30.0, 120.0]]
   thickness: 5.0
