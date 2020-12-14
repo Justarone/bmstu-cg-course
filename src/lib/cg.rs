@@ -5,28 +5,15 @@ static mut Z_BUFFER: [[f64; constants::WIDTH]; constants::HEIGHT] =
 static mut COLOR_BUFFER: [[u32; constants::WIDTH]; constants::HEIGHT] =
     [[constants::DEFAULT_COLOR; constants::WIDTH]; constants::HEIGHT];
 
-pub unsafe fn clear_buffers() {
-    for line in Z_BUFFER.iter_mut() {
-        for pixel in line.iter_mut() {
-            *pixel = constants::MIN_Z;
-        }
-    }
-
-    for line in COLOR_BUFFER.iter_mut() {
-        for color in line.iter_mut() {
-            *color = constants::DEFAULT_COLOR;
-        }
-    }
-}
-
+// INPUT: points with normals, transformation matrix, light_source, color of input figure.
+// RESULT: flushes all visible parts of transformed figure in internal COLOR_BUFFER.
 pub unsafe fn transform_and_add(
-    points_and_normals: &(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>),
+    (points_groups, normals_groups): &(Vec<Vec<Point3d>>, Vec<Vec<Point3d>>),
     matrix: &Matrix4,
     light_source: Point3d,
     color: u32,
 ) {
-    let (points_groups, normals_groups) = points_and_normals;
-
+    // for every triangulated group of input figure:
     for (points, normals) in points_groups.iter().zip(normals_groups.iter()) {
         let (p1, p2) = (
             transform_and_normalize(points[0], normals[0], matrix),
@@ -34,15 +21,18 @@ pub unsafe fn transform_and_add(
         );
         let mut current_window = [p1, p2, (Point3d::default(), Vec3d::default())];
 
+        // for every triangle (3 points + 3 normal points):
         for (change_index, (&new_point, &new_normal)) in (2..)
             .map(|elem| elem % 3)
             .zip(points.iter().skip(2).zip(normals.iter().skip(2)))
         {
+            // transform new point
             current_window[change_index] = transform_and_normalize(new_point, new_normal, matrix);
+            // check if any part of triangle visible and triangle isn't rotated to background
             if check_pos_all(current_window.iter().map(|elem| elem.0))
                 && check_normals_all(current_window.iter().map(|elem| elem.1))
             {
-                // no way to build slice from iterator :(
+                // divide triangle on points array and normal points array
                 let points = [
                     current_window[0].0,
                     current_window[1].0,
@@ -53,23 +43,9 @@ pub unsafe fn transform_and_add(
                     current_window[1].1,
                     current_window[2].1,
                 ];
+                // add transformed triangle polygon to buffer
                 add_polygon(points, normals, &light_source, color);
             }
-        }
-    }
-}
-
-pub unsafe fn flush(pb: Pixbuf) {
-    for (i, line) in COLOR_BUFFER.iter().enumerate() {
-        for (j, pixel) in line.iter().enumerate() {
-            pb.put_pixel(
-                j as u32,
-                i as u32,
-                (pixel >> 24) as u8,
-                (pixel >> 16 & 0xFF) as u8,
-                (pixel >> 8 & 0xFF) as u8,
-                (pixel & 0xFF) as u8,
-            );
         }
     }
 }
@@ -80,17 +56,23 @@ unsafe fn add_polygon(
     light_source: &Point3d,
     color: u32,
 ) {
+    // cast Y coordinate to integer (coordinates of the screen are integers)
     let mut int_points = [
         IntYPoint3d::from(points[0]),
         IntYPoint3d::from(points[1]),
         IntYPoint3d::from(points[2]),
     ];
+    // sort points by Y coordinate
     sort_by_y(&mut int_points, &mut normals);
+    // find brightnesses for all vertexes for furhter processing by Gouraud algorithm
     let brightnesses = find_brightnesses(points, normals, light_source);
+    // divide triangle on 2 pairs of sections, which make up 2 triangles with
+    // parallel to X axis edge
     let sections = divide_on_sections(int_points, brightnesses);
     process_sections(sections, color);
 }
 
+// application of Gouraud and Z-buffer algorithms for 2 processed triangles
 unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
     for pair in sections.chunks_mut(2) {
         if pair[0].x_start > pair[1].x_start {
@@ -139,6 +121,35 @@ unsafe fn process_sections(mut sections: [Section; 4], color: u32) {
     }
 }
 
+pub unsafe fn flush(pb: Pixbuf) {
+    for (i, line) in COLOR_BUFFER.iter().enumerate() {
+        for (j, pixel) in line.iter().enumerate() {
+            pb.put_pixel(
+                j as u32,
+                i as u32,
+                (pixel >> 24) as u8,
+                (pixel >> 16 & 0xFF) as u8,
+                (pixel >> 8 & 0xFF) as u8,
+                (pixel & 0xFF) as u8,
+            );
+        }
+    }
+}
+
+pub unsafe fn clear_buffers() {
+    for line in Z_BUFFER.iter_mut() {
+        for pixel in line.iter_mut() {
+            *pixel = constants::MIN_Z;
+        }
+    }
+
+    for line in COLOR_BUFFER.iter_mut() {
+        for color in line.iter_mut() {
+            *color = constants::DEFAULT_COLOR;
+        }
+    }
+}
+
 unsafe fn put_color(x: usize, y: usize, color: u32, br: f64) {
     let (r, g, b, a) = (
         (color >> 24) as f64 * br,
@@ -168,7 +179,11 @@ fn sort_by_y(int_points: &mut [IntYPoint3d; 3], normals: &mut [Vec3d; 3]) {
     }
 }
 
-fn find_brightnesses(points: [Point3d; 3], normals: [Vec3d; 3], light_source: &Point3d) -> [f64; 3] {
+fn find_brightnesses(
+    points: [Point3d; 3],
+    normals: [Vec3d; 3],
+    light_source: &Point3d,
+) -> [f64; 3] {
     let mut lsvs = Vec::with_capacity(3);
     for i in 0..3 {
         let mut lsv = Vec3d::from_pts(&points[i], light_source);
