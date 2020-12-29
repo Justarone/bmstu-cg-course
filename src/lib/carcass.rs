@@ -15,11 +15,15 @@ impl Carcass {
         }
     }
 
+    pub fn data(&self) -> [[f64; 2]; 2] {
+        self.data
+    }
+
     pub fn check_diff(&self, diff: f64) -> bool {
         self.cur_len + diff < self.data[0][1] + self.data[1][0] // max
             && self.cur_len + diff >
             f64::sqrt(f64::abs(f64::powi(self.data[0][1], 2) - f64::powi(self.data[1][0], 2)))
-        // min
+            // min
     }
 
     #[allow(dead_code)]
@@ -102,12 +106,12 @@ impl Carcass {
     ) {
         let (mut tube_points, mut tube_normals) = rotate_intersections(
             &[
-                Point3d::new(0_f64, self.thickness, 0_f64),
-                Point3d::new(len, self.thickness, 0_f64),
+            Point3d::new(0_f64, self.thickness, 0_f64),
+            Point3d::new(len, self.thickness, 0_f64),
             ],
             &[
-                Point3d::new(0_f64, 2_f64 * self.thickness, 0_f64),
-                Point3d::new(len, 2_f64 * self.thickness, 0_f64),
+            Point3d::new(0_f64, 2_f64 * self.thickness, 0_f64),
+            Point3d::new(len, 2_f64 * self.thickness, 0_f64),
             ],
             constants::CARCASS_STEP,
         );

@@ -32,7 +32,7 @@ pub const CARCASS_COLOR: u32 = 0xCCCCCCFF;
 pub const ZERO_BRIGHTNESS: f64 = 0.6;
 pub const BRIGHTNESS_RANGE: f64 = 0.4;
 
-pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "main.yaml"];
+pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "real.yaml"];
 
 // this light vector must be normalized and it must direct to light source
 pub const LIGHT_SOURCE: Point3d = Point3d {

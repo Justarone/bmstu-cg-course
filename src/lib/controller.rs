@@ -1,4 +1,4 @@
-use log::{debug, info};
+use log::{trace, debug, info};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 use termion::{color, style};
@@ -67,6 +67,9 @@ impl Controller {
             muscle.deform(diff);
             self.cached_muscle = Some(muscle.bget_points_and_normals(bounder));
             self.cached_carcass = Some(carcass.get_points_and_normals());
+            let data = carcass.data();
+            trace!("Updated radiuses: {:?}\nangle: {}", muscle.radiuses(),
+            180_f64 / std::f64::consts::PI * angle_from_triangle(muscle.len(), data[0][1], data[1][0]));
         }
     }
 

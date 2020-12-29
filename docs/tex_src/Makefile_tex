@@ -3,7 +3,8 @@
 all: report.pdf
 
 report.pdf: report.tex
-	latexmk -f -pdf -pdflatex="pdflatex -interaction=nonstopmode" -use-make report.tex
+	pdflatex report.tex && bibtex report && pdflatex report.tex && pdflatex report.tex
+	#latexmk -f -pdf -pdflatex="pdflatex -interaction=nonstopmode" -use-make report.tex
 
 clean:
 	latexmk -CA

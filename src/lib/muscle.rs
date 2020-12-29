@@ -21,6 +21,10 @@ impl Muscle {
         }
     }
 
+    pub fn radiuses(&self) -> &[f64] {
+        &self.radiuses
+    }
+
     fn get_angle(&self, i: usize) -> f64 {
         let last = self.radiuses.len() - 1;
         match i {
@@ -88,10 +92,10 @@ impl Muscle {
         let index_arr = [0, self.radiuses.len() - 1];
         for (center, rad) in index_arr
             .iter()
-            .map(|&index| (self.dx * index as f64, self.radiuses[index]))
-        {
-            add_uv_sphere(points, normal2points, center, rad);
-        }
+                .map(|&index| (self.dx * index as f64, self.radiuses[index]))
+                {
+                    add_uv_sphere(points, normal2points, center, rad);
+                }
     }
 
     pub fn get_points_and_normals(&self) -> (Vec<Vec<Point3d>>, Vec<Vec<Point3d>>) {
@@ -179,9 +183,9 @@ impl Muscle {
     pub fn get_node(&self, pos: usize) -> Result<(f64, f64), String> {
         if pos >= self.radiuses.len() {
             return Err(format!(
-                "Bad pos!\npos: {};\nnumber of nodes: {}.",
-                pos,
-                self.radiuses.len()
+                    "Bad pos!\npos: {};\nnumber of nodes: {}.",
+                    pos,
+                    self.radiuses.len()
             ));
         }
         Ok((self.radiuses[pos], self.grow_mults[pos]))
@@ -193,9 +197,9 @@ impl Muscle {
             MuscleOperation::Del(pos) => {
                 if pos > self.radiuses.len() - 1 || self.radiuses.len() < 3 {
                     return Err(format!(
-                        "Can't delete!\npos: {};\nnumber of nodes: {}",
-                        pos,
-                        self.radiuses.len()
+                            "Can't delete!\npos: {};\nnumber of nodes: {}",
+                            pos,
+                            self.radiuses.len()
                     ));
                 }
                 self.radiuses.remove(pos);
@@ -210,9 +214,9 @@ impl Muscle {
             MuscleOperation::Mod(MOParams { pos, rad, gm }) => {
                 if pos > self.radiuses.len() - 1 {
                     return Err(format!(
-                        "Can't modify!\npos: {};\nnumber of nodes: {}",
-                        pos,
-                        self.radiuses.len()
+                            "Can't modify!\npos: {};\nnumber of nodes: {}",
+                            pos,
+                            self.radiuses.len()
                     ));
                 }
                 self.radiuses[pos] = rad;
@@ -222,9 +226,9 @@ impl Muscle {
             MuscleOperation::Add(MOParams { pos, rad, gm }) => {
                 if pos > self.radiuses.len() {
                     return Err(format!(
-                        "Can't add!\npos: {};\nlen: {}",
-                        pos,
-                        self.radiuses.len()
+                            "Can't add!\npos: {};\nlen: {}",
+                            pos,
+                            self.radiuses.len()
                     ));
                 }
                 self.radiuses.insert(pos, rad);
@@ -254,21 +258,21 @@ impl Muscle {
             if cv < 0_f64 {
                 for (p, n) in points[i - 1]
                     .iter_mut()
-                    .skip(1)
-                    .step_by(2)
-                    .zip(normals[i - 1].iter_mut().skip(1).step_by(2))
-                {
-                    p.y += cv;
-                    n.y += cv;
-                }
+                        .skip(1)
+                        .step_by(2)
+                        .zip(normals[i - 1].iter_mut().skip(1).step_by(2))
+                        {
+                            p.y += cv;
+                            n.y += cv;
+                        }
                 for (p, n) in points[i]
                     .iter_mut()
-                    .step_by(2)
-                    .zip(normals[i].iter_mut().step_by(2))
-                {
-                    p.y += cv;
-                    n.y += cv;
-                }
+                        .step_by(2)
+                        .zip(normals[i].iter_mut().step_by(2))
+                        {
+                            p.y += cv;
+                            n.y += cv;
+                        }
             }
         }
         (points, normals)
