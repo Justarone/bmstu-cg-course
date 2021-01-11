@@ -32,7 +32,7 @@ pub const CARCASS_COLOR: u32 = 0xCCCCCCFF;
 pub const ZERO_BRIGHTNESS: f64 = 0.6;
 pub const BRIGHTNESS_RANGE: f64 = 0.4;
 
-pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "real.yaml"];
+pub const RELATIVE_CONF_PATH: [&str; 2] = ["config", "main.yaml"];
 
 // this light vector must be normalized and it must direct to light source
 pub const LIGHT_SOURCE: Point3d = Point3d {
@@ -109,7 +109,14 @@ pub const GM_INPUT: usize = 2;
 pub const X_INPUT: usize = 3;
 pub const Y_INPUT: usize = 4;
 pub const Z_INPUT: usize = 5;
-pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = ["pos_input", "rad_input", "gm_input", "x_input", "y_input", "z_input"];
+pub const INPUTS_NAMES: [&str; INPUTS_AMOUNT] = [
+    "pos_input",
+    "rad_input",
+    "gm_input",
+    "x_input",
+    "y_input",
+    "z_input",
+];
 
 pub const RBTNS_AMOUNT: usize = 10;
 pub const ADD_BTN: usize = 0;
@@ -123,7 +130,16 @@ pub const MODPG_BTN: usize = 7;
 pub const MODMG_BTN: usize = 8;
 pub const MOVE_LS: usize = 9;
 pub const RBTNS_NAMES: [&str; RBTNS_AMOUNT] = [
-    "add_btn", "del_btn", "mod_btn", "next_btn", "prev_btn", "modp_btn", "modm_btn", "modpg_btn", "modmg_btn", "move_ls"
+    "add_btn",
+    "del_btn",
+    "mod_btn",
+    "next_btn",
+    "prev_btn",
+    "modp_btn",
+    "modm_btn",
+    "modpg_btn",
+    "modmg_btn",
+    "move_ls",
 ];
 
 pub const DELTA_VAL: f64 = 1.0;
